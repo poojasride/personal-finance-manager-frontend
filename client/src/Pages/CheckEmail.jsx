@@ -1,6 +1,7 @@
 import React from "react";
 import email from "../assets/email.svg";
-import Footer from "../components/Footer";
+import Footer from "../components/FooterContent";
+import { Link } from "react-router-dom";
 
 function CheckEmail() {
   return (
@@ -11,18 +12,24 @@ function CheckEmail() {
       <p className="text-center mt-4 text-gray-600">
         We've sent a password reset link to your email address.
       </p>
-      <button className="w-full bg-black text-white py-2 px-4 rounded mt-4 hover:bg-gray-800 font-semibold  cursor-pointer">
+      <Link
+        to="/"
+        className=" block  w-full bg-black text-white text-center py-2 px-4 rounded mt-4 hover:bg-gray-800 font-semibold  cursor-pointer "
+      >
         Back to Sign In
-      </button>
+      </Link>
 
       <h1 className="text-center mt-4 text-gray-600 text-sm">
         Don't receive the email?{" "}
-        <span className="text-gray-800 font-semibold hover:underline cursor-pointer">
+        <Link
+          to="/forgot-password"
+          className="text-gray-800 font-semibold hover:underline cursor-pointer"
+        >
           Resend
-        </span>
+        </Link>
       </h1>
 
-      <Footer/>
+      <Footer />
     </div>
   );
 }
