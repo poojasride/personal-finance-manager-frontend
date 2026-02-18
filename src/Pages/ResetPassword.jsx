@@ -9,6 +9,9 @@ import { useParams, useNavigate } from "react-router-dom";
 function ResetPassword() {
   // Get token from URL
   const { token } = useParams();
+
+  console.log(token)
+
   const navigate = useNavigate();
 
   //  Step 1: Initial values for form
