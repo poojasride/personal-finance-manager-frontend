@@ -52,17 +52,17 @@ function Signin() {
       alert(
         error.response?.data?.error || "Signin failed. Please try again.",
       );
-    }
+    } 
   };
 
   return (
     <div className="max-w-4xl mx-auto p-8 ">
       <Logo />
       <h1 className="text-3xl font-bold text-center font-serif">
-        Welcome to <span className="text-green-800">E-Mart</span>
+        Welcome to <span className="text-green-800">Personal Finance Manager</span>
       </h1>
       <p className="text-center mt-4 text-gray-600 text-lg font-semibold tracking-loose">
-        Please sign in to your account to continue shopping with Love!
+        Please sign in to manage your personal finances securely.
       </p>
 
       <Formik
@@ -130,7 +130,7 @@ function Signin() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-black text-white py-2 px-4 rounded mt-4 hover:bg-gray-800 font-semibold  cursor-pointer"
+                  className="w-full bg-emerald-500 text-white py-2 px-4 rounded mt-4 hover:bg-emerald-600 font-semibold  cursor-pointer"
                 >
                   {isSubmitting ? "Signing In..." : "Sign In"}
                 </button>

@@ -20,7 +20,7 @@ function SuccessReset() {
       </p>
 
       <Link to= "/"
-        className=" block w-full bg-black text-white text-center py-2 px-4 rounded mt-4 hover:bg-gray-800 font-semibold  cursor-pointer"
+        className=" block w-full bg-emerald-500 text-white text-center py-2 px-4 rounded mt-4 hover:bg-emerald-600 font-semibold  cursor-pointer"
         type="button"
       >
         Back to Login

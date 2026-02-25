@@ -91,7 +91,7 @@ function ForgotPassword() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-black text-white py-2 px-4 rounded mt-4 hover:bg-gray-800 font-semibold  cursor-pointer"
+                className="w-full bg-emerald-500 text-white py-2 px-4 rounded mt-4 hover:bg-emerald-600 font-semibold  cursor-pointer"
               >
                 {isSubmitting ? "Submitting..." : "Submit"}
               </button>
