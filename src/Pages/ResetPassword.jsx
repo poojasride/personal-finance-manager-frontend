@@ -42,7 +42,7 @@ function ResetPassword() {
 
       // API call
       const response = await axios.post(
-        `https://password-reset-backend-iaah.onrender.com/api/auth/reset-password/${token}`, //  backend URL
+        `${process.env.BASE_URL}/api/auth/reset-password/${token}`, //  backend URL
         values,
       );
 

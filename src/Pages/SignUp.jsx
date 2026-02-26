@@ -46,7 +46,7 @@ function SignUp() {
 
       // API call
       const response = await axios.post(
-        "https://password-reset-backend-iaah.onrender.com/api/user", //  backend URL
+        `${process.env.BASE_URL}/api/user`, //  backend URL
         values,
       );
 
