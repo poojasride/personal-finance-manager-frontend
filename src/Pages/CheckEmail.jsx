@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 function CheckEmail() {
   return (
-    <div className="max-w-2xl mx-auto p-8 min-h-screen">
+    <div className="max-w-2xl mx-auto p-8 min-h-screen m-18">
       <img src={email} alt="" className="mx-auto w-24 h-24" />
 
       <h1 className="text-3xl font-bold text-center mt-4">Check Your Email</h1>

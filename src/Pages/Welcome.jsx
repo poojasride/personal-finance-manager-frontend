@@ -2,7 +2,7 @@ import Logo from "../components/Logo";
 
 function WelcomeBlog() {
   return (
-    <section className="w-full bg-white min-h-screen">
+    <section className="w-full bg-white min-h-screen  m-8">
       {/* Header */}
       <header className="max-w-3xl mx-auto  border-b border-gray-200 bg-white  flex  items-center gap-3">
         <div className="px-6 py-5">

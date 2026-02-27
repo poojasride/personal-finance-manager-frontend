@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 function SuccessReset() {
   return (
-    <div className="max-w-xl mx-auto p-8 min-h-screen">
+    <div className="max-w-xl mx-auto p-8 min-h-screen  m-18">
       <img
         src={Success}
         alt="Success Icon"

@@ -42,7 +42,7 @@ function ResetPassword() {
 
       // API call
       const response = await axios.post(
-        `${process.env.BASE_URL}/api/auth/reset-password/${token}`, //  backend URL
+        `http://localhost:5000/api/auth/reset-password/${token}`, //  backend URL
         values,
       );
 
@@ -67,8 +67,8 @@ function ResetPassword() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-8 min-h-screen">
-      <Logo />
+    <div className="max-w-4xl mx-auto p-8 min-h-screen m-18">
+      {/* <Logo /> */}
       <h1 className="text-3xl font-bold text-center ">Create New Password </h1>
       <p className="text-center mt-4 text-gray-600">
         Enter your email address below to complete the reset

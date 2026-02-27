@@ -46,7 +46,7 @@ function SignUp() {
 
       // API call
       const response = await axios.post(
-        `${process.env.BASE_URL}/api/user`, //  backend URL
+        `http://localhost:5000/api/auth/register`, //  backend URL
         values,
       );
 
@@ -68,8 +68,8 @@ function SignUp() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-8 ">
-      <img src={logo} alt="Personal Finance Manager Logo" className="mx-auto w-24 h-24" />
+    <div className="max-w-4xl mx-auto p-8  m-18">
+      {/* <img src={logo} alt="Personal Finance Manager Logo" className="mx-auto w-24 h-24" /> */}
       <h1 className="text-3xl font-bold text-center font-serif">
         Create Your <span className="text-green-800">Personal Finance Manager</span> Account
       </h1>

@@ -31,7 +31,7 @@ function ForgotPassword() {
 
       // API call
       const response = await axios.post(
-        `${process.env.BASE_URL}/api/auth/forgot-password`, //  backend URL
+        `http://localhost:5000/api/auth/forgot-password`, //  backend URL
         values,
       );
 
@@ -56,8 +56,8 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-8 min-h-screen">
-      <Logo />
+    <div className="max-w-4xl mx-auto p-8 min-h-screen  m-18">
+      {/* <Logo /> */}
       <h1 className="text-3xl font-bold text-center ">Forgot Password </h1>
       <p className="text-center mt-4 text-gray-600">
         No worries! Enter your email address below and we'll

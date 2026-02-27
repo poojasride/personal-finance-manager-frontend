@@ -35,7 +35,7 @@ function Signin() {
 
       //API call
       const response = await axios.post(
-        `${process.env.BASE_URL}/api/auth/login`,
+        `http://localhost:5000/api/auth/login`,
         values,
       );
 
@@ -56,8 +56,8 @@ function Signin() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-8 ">
-      <Logo />
+    <div className="max-w-4xl mx-auto p-8 m-18">
+      {/* <Logo /> */}
       <h1 className="text-3xl font-bold text-center font-serif">
         Welcome to <span className="text-green-800">Personal Finance Manager</span>
       </h1>
