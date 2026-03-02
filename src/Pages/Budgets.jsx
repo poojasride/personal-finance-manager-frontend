@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { getBudgets } from "../api/budgetApi";
+import { getBudgets, createBudget } from "../api/budgetApi";
 import BudgetDonutChart from "../components/BudgetDonutChart";
 import { Trash2 } from "lucide-react";
 
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+
 function Budgets() {
+
   const [budgets, setBudgets] = useState([]);
 
-  const [formData, setFormData] = useState({
-    category: "",
-    limitAmount: "",
-    period: "monthly",
-    startDate: "",
-    endDate: "",
-  });
-
+  // Load budgets when page loads
   useEffect(() => {
     loadBudgets();
   }, []);
@@ -27,13 +24,70 @@ function Budgets() {
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  // ✅ Step 1: Initial values
+  const initialValues = {
+    category: "",
+    limitAmount: "",
+    period: "monthly",
+    startDate: "",
+    endDate: "",
   };
 
+  // ✅ Step 2: Validation schema
+  const validationSchema = Yup.object({
+
+    category: Yup.string()
+      .min(3, "Category must be at least 3 characters")
+      .required("Category is required"),
+
+    limitAmount: Yup.number()
+      .typeError("Amount must be a number")
+      .positive("Amount must be greater than 0")
+      .required("Amount is required"),
+
+    period: Yup.string()
+      .required("Period is required"),
+
+    startDate: Yup.date()
+      .required("Start date is required"),
+
+    endDate: Yup.date()
+      .min(
+        Yup.ref("startDate"),
+        "End date must be after start date"
+      )
+      .required("End date is required"),
+  });
+
+  // ✅ Step 3: Submit function
+  const onSubmit = async (values, { resetForm, setSubmitting }) => {
+
+    try {
+
+      setSubmitting(true);
+
+      await createBudget(values);
+
+      alert("Budget created successfully");
+
+      resetForm();
+
+      loadBudgets();
+
+    } catch (error) {
+
+      console.log(error);
+      alert("Error creating budget");
+
+    } finally {
+
+      setSubmitting(false);
+
+    }
+
+  };
+
+  // Summary calculations
   const totalBudget = budgets.reduce(
     (acc, item) => acc + item.limitAmount,
     0
@@ -47,7 +101,7 @@ function Budgets() {
   const remaining = totalBudget - totalSpent;
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen ">
+    <div className="p-6 bg-gray-50 min-h-screen">
 
       {/* Header */}
       <div className="mb-6">
@@ -63,27 +117,21 @@ function Budgets() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
 
         <div className="bg-white p-5 rounded-xl shadow">
-          <p className="text-gray-500 text-sm">
-            Total Budget
-          </p>
+          <p className="text-gray-500 text-sm">Total Budget</p>
           <h2 className="text-2xl font-bold mt-1">
             ₹{totalBudget}
           </h2>
         </div>
 
         <div className="bg-white p-5 rounded-xl shadow">
-          <p className="text-gray-500 text-sm">
-            Total Spent
-          </p>
+          <p className="text-gray-500 text-sm">Total Spent</p>
           <h2 className="text-2xl font-bold text-red-500 mt-1">
             ₹{totalSpent}
           </h2>
         </div>
 
         <div className="bg-white p-5 rounded-xl shadow">
-          <p className="text-gray-500 text-sm">
-            Remaining Budget
-          </p>
+          <p className="text-gray-500 text-sm">Remaining Budget</p>
           <h2 className="text-2xl font-bold text-emerald-600 mt-1">
             ₹{remaining}
           </h2>
@@ -91,108 +139,145 @@ function Budgets() {
 
       </div>
 
-      {/* Chart + Form */}
+      {/* Form + Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
-      
-
-        {/* Add Budget Form */}
+        {/* ✅ FORM */}
         <div className="bg-white p-6 rounded-xl shadow">
 
           <h3 className="font-semibold text-gray-700 mb-4">
             Add Budget
           </h3>
 
-          <form className="space-y-4">
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={onSubmit}
+          >
+            {({ isSubmitting }) => (
 
-            <div>
-              <label className="text-sm text-gray-600">
-                Category
-              </label>
+              <Form className="space-y-4">
 
-              <input
-                name="category"
-                onChange={handleChange}
-                className="w-full border p-2 rounded-lg mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"
-                placeholder="Food, Rent, Travel"
-              />
-            </div>
+                {/* Category */}
+                <div>
+                  <label className="text-sm text-gray-600">
+                    Category
+                  </label>
 
-            <div>
-              <label className="text-sm text-gray-600">
-                Amount
-              </label>
+                  <Field
+                    name="category"
+                    type="text"
+                    placeholder="Food, Rent, Travel"
+                    className="w-full border p-2 rounded-lg mt-1"
+                  />
 
-              <input
-                type="number"
-                name="limitAmount"
-                onChange={handleChange}
-                className="w-full border p-2 rounded-lg mt-1 focus:ring-2 focus:ring-emerald-500 outline-none"
-                placeholder="5000"
-              />
-            </div>
+                  <ErrorMessage
+                    name="category"
+                    component="div"
+                    className="text-red-500 text-sm"
+                  />
+                </div>
 
-            <div>
-              <label className="text-sm text-gray-600">
-                Period
-              </label>
+                {/* Amount */}
+                <div>
+                  <label className="text-sm text-gray-600">
+                    Amount
+                  </label>
 
-              <select
-                name="period"
-                onChange={handleChange}
-                className="w-full border p-2 rounded-lg mt-1"
-              >
-                <option value="monthly">
-                  Monthly
-                </option>
-                <option value="yearly">
-                  Yearly
-                </option>
-              </select>
-            </div>
+                  <Field
+                    name="limitAmount"
+                    type="number"
+                    placeholder="5000"
+                    className="w-full border p-2 rounded-lg mt-1"
+                  />
 
-            <div className="grid grid-cols-2 gap-4">
+                  <ErrorMessage
+                    name="limitAmount"
+                    component="div"
+                    className="text-red-500 text-sm"
+                  />
+                </div>
 
-              <div>
-                <label className="text-sm text-gray-600">
-                  Start Date
-                </label>
+                {/* Period */}
+                <div>
+                  <label className="text-sm text-gray-600">
+                    Period
+                  </label>
 
-                <input
-                  type="date"
-                  name="startDate"
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded-lg mt-1"
-                />
-              </div>
+                  <Field
+                    as="select"
+                    name="period"
+                    className="w-full border p-2 rounded-lg mt-1"
+                  >
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                  </Field>
 
-              <div>
-                <label className="text-sm text-gray-600">
-                  End Date
-                </label>
+                  <ErrorMessage
+                    name="period"
+                    component="div"
+                    className="text-red-500 text-sm"
+                  />
+                </div>
 
-                <input
-                  type="date"
-                  name="endDate"
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded-lg mt-1"
-                />
-              </div>
+                {/* Dates */}
+                <div className="grid grid-cols-2 gap-4">
 
-            </div>
+                  <div>
+                    <label className="text-sm text-gray-600">
+                      Start Date
+                    </label>
 
-            <button
-              type="submit"
-              className="w-full bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700 transition"
-            >
-              Create Budget
-            </button>
+                    <Field
+                      type="date"
+                      name="startDate"
+                      className="w-full border p-2 rounded-lg mt-1"
+                    />
 
-          </form>
+                    <ErrorMessage
+                      name="startDate"
+                      component="div"
+                      className="text-red-500 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm text-gray-600">
+                      End Date
+                    </label>
+
+                    <Field
+                      type="date"
+                      name="endDate"
+                      className="w-full border p-2 rounded-lg mt-1"
+                    />
+
+                    <ErrorMessage
+                      name="endDate"
+                      component="div"
+                      className="text-red-500 text-sm"
+                    />
+                  </div>
+
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700"
+                >
+                  {isSubmitting ? "Creating..." : "Create Budget"}
+                </button>
+
+              </Form>
+
+            )}
+          </Formik>
 
         </div>
 
-          {/* Chart */}
+        {/* Chart */}
         <div className="bg-white p-6 rounded-xl shadow">
 
           <h3 className="font-semibold text-gray-700 mb-4">
@@ -205,7 +290,7 @@ function Budgets() {
 
       </div>
 
-      {/* Budget Table */}
+      {/* Table */}
       <div className="bg-white rounded-xl shadow">
 
         <div className="p-5 border-b">
@@ -216,49 +301,17 @@ function Budgets() {
 
         <table className="w-full">
 
-          <thead className="bg-gray-50 text-gray-500 text-sm">
-
-            <tr>
-              <th className="p-4 text-left">
-                Category
-              </th>
-              <th className="p-4 text-left">
-                Amount
-              </th>
-              <th className="p-4 text-left">
-                Period
-              </th>
-              <th className="p-4 text-left">
-                Start
-              </th>
-              <th className="p-4 text-left">
-                End
-              </th>
-              <th className="p-4"></th>
-            </tr>
-
-          </thead>
-
           <tbody>
 
             {budgets.map((budget) => (
 
-              <tr
-                key={budget._id}
-                className="border-t hover:bg-gray-50"
-              >
+              <tr key={budget._id} className="border-t">
 
-                <td className="p-4 font-medium">
-                  {budget.category}
-                </td>
+                <td className="p-4">{budget.category}</td>
 
-                <td className="p-4">
-                  ₹{budget.limitAmount}
-                </td>
+                <td className="p-4">₹{budget.limitAmount}</td>
 
-                <td className="p-4 capitalize">
-                  {budget.period}
-                </td>
+                <td className="p-4">{budget.period}</td>
 
                 <td className="p-4">
                   {budget.startDate?.slice(0, 10)}
@@ -269,7 +322,7 @@ function Budgets() {
                 </td>
 
                 <td className="p-4">
-                  <Trash2 className="text-red-500 cursor-pointer hover:scale-110 transition" />
+                  <Trash2 className="text-red-500 cursor-pointer" />
                 </td>
 
               </tr>
