@@ -6,27 +6,55 @@ import ResetPassword from "./Pages/ResetPassword";
 import { Routes, Route, Link } from "react-router-dom";
 import WelcomeBlog from "./Pages/Welcome";
 import SuccessReset from "./Pages/SuccessReset";
+import Dashboard from "./Pages/Dashboard";
+import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
+import Budgets from "./Pages/Budgets";
+import Transactions from "./Pages/Transactions";
+import Goals from "./Pages/Goals";
+import Analytics from "./Pages/Analytics";
+import Accounts from "./Pages/Accounts";
+import Recurring from "./Pages/Recurring";
+import Categories from "./Pages/Categories";
+import Export from "./Pages/Export";
+import Settings from "./Pages/Settings";
+import Logout from "./Pages/Logout";
+import Layout from "./Pages/Layout";
 
 function App() {
   return (
     <>
-      <section className="grid grid-cols-2 gap-2">
-        {/* Left Side */}
-        <div className="bg-emerald-500  min-h-screen ">{/* set logo left side */}</div>
+      {/* Authentication Side */}
+      <div>
+        <Routes>
+          <Route path="/" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/check-email" element={<CheckEmail />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/welcome" element={<WelcomeBlog />} />
+          <Route path="/success" element={<SuccessReset />} />
+        </Routes>
+      </div>
 
-        {/* Right Side */}
-        <div>
-          <Routes>
-            <Route path="/" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/check-email" element={<CheckEmail />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
-            <Route path="/welcome" element={<WelcomeBlog />} />
-            <Route path="/success" element={<SuccessReset />} />
-          </Routes>
-        </div>
-      </section>
+      <Routes>
+        {/* Protected routes */}
+        <Route element={<Layout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+
+          <Route path="/budgets" element={<Budgets />} />
+
+          <Route path="/transactions" element={<Transactions />} />
+
+          <Route path="/goals" element={<Goals />} />
+
+          <Route path="/analytics" element={<Analytics />} />
+
+          <Route path="/settings" element={<Settings />} />
+
+          <Route path="/logout" element={<Logout />} />
+        </Route>
+      </Routes>
     </>
   );
 }

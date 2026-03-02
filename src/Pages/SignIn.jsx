@@ -46,7 +46,7 @@ function Signin() {
       resetForm();
 
       //Navigate welcome page
-      navigate("/welcome");
+      navigate("/dashboard");
     } catch (error) {
       //Error message
       alert(
