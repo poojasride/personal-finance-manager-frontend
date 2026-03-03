@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   getTransactions,
   createTransaction,
   deleteTransaction,
 } from "../api/transactionApi";
-import ExpenseChart from "../components/BudgetDonutChart";
+import ExpenseChart from "../components/ExpenseDonutChart";
 import { Trash2 } from "lucide-react";
 
 import { Formik, Form, Field, ErrorMessage } from "formik";
@@ -12,6 +12,16 @@ import * as Yup from "yup";
 
 function Expense() {
   const [transactions, setTransactions] = useState([]);
+
+  /* ======================
+     TABLE FILTER STATE
+  ====================== */
+  const [filters, setFilters] = useState({
+    type: "",
+    category: "",
+    startDate: "",
+    endDate: "",
+  });
 
   /* ======================
      LOAD DATA
@@ -29,81 +39,34 @@ function Expense() {
     }
   };
 
-  console.log("Transaction", transactions);
   /* ======================
-     FORMIK CONFIG
+     TABLE FILTER LOGIC
+     (ONLY TABLE USES THIS)
   ====================== */
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter((t) => {
+      if (filters.type && t.type !== filters.type) return false;
 
-  const initialValues = {
-    title: "",
-    description: "",
-    amount: "",
-    type: "expense",
-    category: "",
-    date: "",
-  };
+      if (
+        filters.category &&
+        !t.category.toLowerCase().includes(filters.category.toLowerCase())
+      )
+        return false;
 
-  const validationSchema = Yup.object({
-    title: Yup.string()
-      .min(3, "Title must be at least 3 characters")
-      .required("Title is required"),
+      if (filters.startDate && new Date(t.date) < new Date(filters.startDate))
+        return false;
 
-    description: Yup.string().min(
-      3,
-      "Description must be at least 3 characters",
-    ),
+      if (filters.endDate && new Date(t.date) > new Date(filters.endDate))
+        return false;
 
-    amount: Yup.number()
-      .typeError("Amount must be a number")
-      .positive("Amount must be greater than 0")
-      .required("Amount is required"),
-
-    category: Yup.string()
-      .min(3, "Category must be at least 3 characters")
-      .required("Category is required"),
-
-    date: Yup.date().required("Date is required"),
-  });
-
-  const onSubmit = async (values, { resetForm, setSubmitting }) => {
-    try {
-      setSubmitting(true);
-
-      await createTransaction({
-        ...values,
-        amount: Number(values.amount),
-        recurringInterval: values.recurringInterval || null,
-      });
-
-      alert("Transaction created successfully");
-
-      resetForm();
-      loadTransactions();
-    } catch (error) {
-      console.log(error);
-      alert("Error creating transaction");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+      return true;
+    });
+  }, [transactions, filters]);
 
   /* ======================
-     DELETE
+     CALCULATIONS (FULL DATA)
+     Cards & Chart NOT FILTERED
   ====================== */
-
-  const handleDelete = async (id) => {
-    try {
-      await deleteTransaction(id);
-      loadTransactions();
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  /* ======================
-     CALCULATIONS
-  ====================== */
-
   const totalIncome = transactions
     .filter((t) => t.type === "income")
     .reduce((acc, t) => acc + t.amount, 0);
@@ -115,12 +78,59 @@ function Expense() {
   const balance = totalIncome - totalExpense;
 
   /* ======================
+     FORMIK CONFIG
+  ====================== */
+  const initialValues = {
+    title: "",
+    description: "",
+    amount: "",
+    type: "expense",
+    category: "",
+    date: "",
+    isRecurring: false,
+    recurringInterval: "",
+  };
+
+  const validationSchema = Yup.object({
+    title: Yup.string().min(3).required("Title is required"),
+    amount: Yup.number().positive().required("Amount is required"),
+    category: Yup.string().required("Category is required"),
+    date: Yup.date().required("Date is required"),
+  });
+
+  const onSubmit = async (values, { resetForm, setSubmitting }) => {
+    try {
+      setSubmitting(true);
+
+      await createTransaction({
+        ...values,
+        amount: Number(values.amount),
+        recurringInterval: values.isRecurring
+          ? values.recurringInterval
+          : null,
+      });
+
+      resetForm();
+      loadTransactions();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    await deleteTransaction(id);
+    loadTransactions();
+  };
+
+  /* ======================
      UI
   ====================== */
-
   return (
-    <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-6">
+
         {/* HEADER */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-800">
@@ -131,7 +141,7 @@ function Expense() {
           </p>
         </div>
 
-        {/* SUMMARY CARDS */}
+        {/* SUMMARY CARDS (NOT FILTERED) */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6">
           <SummaryCard
             title="Total Income"
@@ -143,7 +153,11 @@ function Expense() {
             value={totalExpense}
             color="text-red-500"
           />
-          <SummaryCard title="Balance" value={balance} color="text-blue-600" />
+          <SummaryCard
+            title="Balance"
+            value={balance}
+            color="text-blue-600"
+          />
         </div>
 
         {/* FORM + CHART */}
@@ -165,7 +179,6 @@ function Expense() {
                   <FormInput name="description" label="Description" full />
                   <FormInput name="amount" label="Amount" type="number" />
 
-                  {/* Type */}
                   <div>
                     <label className="text-sm text-gray-600">Type</label>
                     <Field
@@ -181,7 +194,6 @@ function Expense() {
                   <FormInput name="category" label="Category" />
                   <FormInput name="date" label="Date" type="date" />
 
-                  {/* Recurring */}
                   <div className="flex items-center gap-2 sm:col-span-2">
                     <Field type="checkbox" name="isRecurring" />
                     <label className="text-sm">Recurring</label>
@@ -189,15 +201,12 @@ function Expense() {
 
                   {values.isRecurring && (
                     <div className="sm:col-span-2">
-                      <label className="text-sm text-gray-600">
-                        Recurring Interval
-                      </label>
                       <Field
                         as="select"
                         name="recurringInterval"
-                        className="w-full border p-2 rounded-lg mt-1"
+                        className="w-full border p-2 rounded-lg"
                       >
-                        <option value="">Select interval</option>
+                        <option value="">Select Interval</option>
                         <option value="daily">Daily</option>
                         <option value="weekly">Weekly</option>
                         <option value="monthly">Monthly</option>
@@ -210,7 +219,7 @@ function Expense() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-emerald-600 text-white py-2.5 rounded-lg hover:bg-emerald-700 transition"
+                      className="w-full bg-emerald-600 text-white py-2.5 rounded-lg"
                     >
                       {isSubmitting ? "Adding..." : "Add Transaction"}
                     </button>
@@ -220,17 +229,60 @@ function Expense() {
             </Formik>
           </div>
 
-          {/* CHART */}
+          {/* CHART (NOT FILTERED) */}
           <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <h3 className="font-semibold text-gray-700 mb-4">Overview</h3>
+            <h3 className="font-semibold text-gray-700 mb-4">
+              Overview
+            </h3>
             <ExpenseChart transactions={transactions} />
           </div>
         </div>
 
-        {/* TRANSACTION TABLE */}
+        {/* TABLE FILTERS */}
+        <div className="bg-white p-4 rounded-xl shadow-sm border mb-4 grid sm:grid-cols-4 gap-4">
+          <select
+            className="border p-2 rounded"
+            onChange={(e) =>
+              setFilters({ ...filters, type: e.target.value })
+            }
+          >
+            <option value="">All Types</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+
+          <input
+            type="text"
+            placeholder="Category"
+            className="border p-2 rounded"
+            onChange={(e) =>
+              setFilters({ ...filters, category: e.target.value })
+            }
+          />
+
+          <input
+            type="date"
+            className="border p-2 rounded"
+            onChange={(e) =>
+              setFilters({ ...filters, startDate: e.target.value })
+            }
+          />
+
+          <input
+            type="date"
+            className="border p-2 rounded"
+            onChange={(e) =>
+              setFilters({ ...filters, endDate: e.target.value })
+            }
+          />
+        </div>
+
+        {/* TRANSACTION TABLE (FILTERED ONLY HERE) */}
         <div className="bg-white rounded-xl shadow-sm border">
           <div className="p-4 border-b">
-            <h3 className="font-semibold text-gray-700">Transactions</h3>
+            <h3 className="font-semibold text-gray-700">
+              Transactions
+            </h3>
           </div>
 
           <div className="overflow-x-auto">
@@ -242,28 +294,26 @@ function Expense() {
                   <th className="p-4 text-left">Type</th>
                   <th className="p-4 text-left">Amount</th>
                   <th className="p-4 text-left">Date</th>
-                  <th className="p-4"></th>
+                  <th className="p-4 text-left">Recurring</th>
+                  <th></th>
                 </tr>
               </thead>
 
               <tbody>
-                {transactions.map((t) => (
+                {filteredTransactions.map((t) => (
                   <tr key={t._id} className="border-t">
                     <td className="p-4">{t.title}</td>
                     <td className="p-4">{t.category}</td>
-                    <td className="p-4">
-                      <span
-                        className={`text-xs px-2 py-1 rounded ${
-                          t.type === "income"
-                            ? "bg-emerald-100 text-emerald-600"
-                            : "bg-red-100 text-red-600"
-                        }`}
-                      >
-                        {t.type}
-                      </span>
-                    </td>
+                    <td className="p-4">{t.type}</td>
                     <td className="p-4 font-semibold">₹{t.amount}</td>
-                    <td className="p-4">{t.date?.slice(0, 10)}</td>
+                    <td className="p-4">
+                      {t.date?.slice(0, 10)}
+                    </td>
+                    <td className="p-4">
+                      {t.isRecurring
+                        ? `Yes (${t.recurringInterval})`
+                        : "No"}
+                    </td>
                     <td className="p-4">
                       <Trash2
                         className="text-red-500 cursor-pointer"
@@ -274,6 +324,12 @@ function Expense() {
                 ))}
               </tbody>
             </table>
+
+            {filteredTransactions.length === 0 && (
+              <div className="p-6 text-center text-gray-500">
+                No transactions found
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -291,7 +347,9 @@ function SummaryCard({ title, value, color }) {
   return (
     <div className="bg-white p-5 rounded-xl shadow-sm border">
       <p className="text-sm text-gray-500">{title}</p>
-      <h2 className={`text-2xl font-bold mt-1 ${color}`}>₹{value}</h2>
+      <h2 className={`text-2xl font-bold mt-1 ${color}`}>
+        ₹{value}
+      </h2>
     </div>
   );
 }
