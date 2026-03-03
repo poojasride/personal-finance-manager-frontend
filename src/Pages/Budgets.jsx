@@ -17,7 +17,7 @@ function Budgets() {
 
   const loadBudgets = async () => {
     try {
-      const data = await getBudgets();
+      const res = await getBudgets();
       setBudgets(data);
     } catch (err) {
       console.log(err);
