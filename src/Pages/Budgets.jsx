@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { getBudgets, createBudget, deleteBudget } from "../api/budgetApi";
+import {
+  getBudgets,
+  createBudget,
+  updateBudget,
+  deleteBudget,
+} from "../api/budgetApi";
 import { getTransactions } from "../api/transactionApi";
 import BudgetDonutChart from "../components/BudgetDonutChart";
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -10,6 +15,7 @@ import * as Yup from "yup";
 function Budgets() {
   const [budgets, setBudgets] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [editingBudget, setEditingBudget] = useState(null);
 
   useEffect(() => {
     loadBudgets();
@@ -94,9 +100,15 @@ function Budgets() {
 
   const onSubmit = async (values, { resetForm }) => {
     try {
-     await createBudget(values);
+      if (editingBudget) {
+        await updateBudget(editingBudget._id, values);
+        alert("Budget updated successfully!");
+        setEditingBudget(null);
+      } else {
+        await createBudget(values);
+        alert("Budget created successfully!");
+      }
 
-      alert("Budget created successfully!")
       resetForm();
       loadBudgets();
     } catch (err) {
@@ -155,7 +167,8 @@ function Budgets() {
           <h3 className="mb-4 font-semibold">Add Budget</h3>
 
           <Formik
-            initialValues={initialValues}
+            enableReinitialize
+            initialValues={editingBudget || initialValues}
             validationSchema={validationSchema}
             onSubmit={onSubmit}
           >
@@ -200,42 +213,37 @@ function Budgets() {
                 className="text-red-500 text-sm"
               />
               <div className="grid grid-cols-2 gap-4">
-               <div>
-                    <label className="text-sm text-gray-600">
-                      Start Date
-                    </label>
+                <div>
+                  <label className="text-sm text-gray-600">Start Date</label>
 
-                    <Field
-                      type="date"
-                      name="startDate"
-                      className="w-full border p-2 rounded-lg mt-1"
-                    />
+                  <Field
+                    type="date"
+                    name="startDate"
+                    className="w-full border p-2 rounded-lg mt-1"
+                  />
 
-                    <ErrorMessage
-                      name="startDate"
-                      component="div"
-                      className="text-red-500 text-sm"
-                    />
-                  </div>
+                  <ErrorMessage
+                    name="startDate"
+                    component="div"
+                    className="text-red-500 text-sm"
+                  />
+                </div>
 
-                  <div>
-                    <label className="text-sm text-gray-600">
-                      End Date
-                    </label>
+                <div>
+                  <label className="text-sm text-gray-600">End Date</label>
 
-                    <Field
-                      type="date"
-                      name="endDate"
-                      className="w-full border p-2 rounded-lg mt-1"
-                    />
+                  <Field
+                    type="date"
+                    name="endDate"
+                    className="w-full border p-2 rounded-lg mt-1"
+                  />
 
-                    <ErrorMessage
-                      name="endDate"
-                      component="div"
-                      className="text-red-500 text-sm"
-                    />
-                  </div>
-
+                  <ErrorMessage
+                    name="endDate"
+                    component="div"
+                    className="text-red-500 text-sm"
+                  />
+                </div>
               </div>
 
               <button
@@ -270,7 +278,8 @@ function Budgets() {
               <th className="p-4">Remaining</th>
               <th className="p-4">Progress</th>
               <th className="p-4">Status</th>
-              <th className="p-4">Action</th>
+              <th className="p-4">Edit</th>
+              <th className="p-4">Delete</th>
             </tr>
           </thead>
 
@@ -303,6 +312,15 @@ function Budgets() {
                   >
                     {budget.status}
                   </span>
+                </td>
+
+                <td className="p-4 text-center space-x-3">
+                  <button
+                    onClick={() => setEditingBudget(budget)}
+                    className="text-blue-500 hover:text-blue-700 text-sm"
+                  >
+                    <Pencil size={18}/>
+                  </button>
                 </td>
 
                 <td className="p-4 text-center">
