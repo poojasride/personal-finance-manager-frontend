@@ -50,6 +50,10 @@ function App() {
 
           <Route path="/analytics" element={<Analytics />} />
 
+           <Route path="/recurring" element={<Recurring />} />
+          <Route path="/categories" element={<Categories />} />
+            
+
           <Route path="/settings" element={<Settings />} />
 
           <Route path="/logout" element={<Logout />} />

@@ -10,6 +10,7 @@ const api = axios.create({
   },
 });
 
+
 export const getTransactions = async () => {
   const res = await api.get("/");
   return res.data;
@@ -17,6 +18,11 @@ export const getTransactions = async () => {
 
 export const createTransaction = async (data) => {
   const res = await api.post("/", data);
+  return res.data;
+};
+
+export const updateTransaction = async (id, data) => {
+  const res = await api.put(`/${id}`, data);
   return res.data;
 };
 

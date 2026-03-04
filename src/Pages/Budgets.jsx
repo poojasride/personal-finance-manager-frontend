@@ -172,6 +172,7 @@ function Budgets() {
             validationSchema={validationSchema}
             onSubmit={onSubmit}
           >
+            {({ values, isSubmitting }) => (
             <Form className="space-y-4">
               <label className="text-sm text-gray-600">Category</label>
               <Field
@@ -250,9 +251,16 @@ function Budgets() {
                 type="submit"
                 className="w-full bg-emerald-600 text-white py-2 rounded"
               >
-                Create Budget
+               {isSubmitting
+                        ? editingBudget
+                          ? "Updating..."
+                          : "Adding..."
+                        : editingBudget
+                          ? "Update Budget"
+                          : "Add Budget"}
               </button>
             </Form>
+            )}
           </Formik>
         </div>
 

@@ -139,15 +139,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             Categories
           </Link>
 
-          <Link
-            to="/accounts"
-            onClick={() => setIsOpen(false)}
-            className={`flex items-center gap-3 p-2 rounded-lg ${activeClass("/accounts")}`}
-          >
-            <CreditCard size={20} />
-            Accounts
-          </Link>
-
+         
           <Link
             to="/export-csv"
             onClick={() => setIsOpen(false)}

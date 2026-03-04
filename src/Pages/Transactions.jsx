@@ -2,20 +2,19 @@ import React, { useEffect, useState, useMemo } from "react";
 import {
   getTransactions,
   createTransaction,
+  updateTransaction,
   deleteTransaction,
 } from "../api/transactionApi";
 import ExpenseChart from "../components/ExpenseDonutChart";
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
 function Expense() {
   const [transactions, setTransactions] = useState([]);
+  const [editingTransaction, setEditingTransaction] = useState(null);
 
-  /* ======================
-     TABLE FILTER STATE
-  ====================== */
   const [filters, setFilters] = useState({
     type: "",
     category: "",
@@ -23,9 +22,6 @@ function Expense() {
     endDate: "",
   });
 
-  /* ======================
-     LOAD DATA
-  ====================== */
   useEffect(() => {
     loadTransactions();
   }, []);
@@ -39,10 +35,6 @@ function Expense() {
     }
   };
 
-  /* ======================
-     TABLE FILTER LOGIC
-     (ONLY TABLE USES THIS)
-  ====================== */
   const filteredTransactions = useMemo(() => {
     return transactions.filter((t) => {
       if (filters.type && t.type !== filters.type) return false;
@@ -63,10 +55,6 @@ function Expense() {
     });
   }, [transactions, filters]);
 
-  /* ======================
-     CALCULATIONS (FULL DATA)
-     Cards & Chart NOT FILTERED
-  ====================== */
   const totalIncome = transactions
     .filter((t) => t.type === "income")
     .reduce((acc, t) => acc + t.amount, 0);
@@ -77,9 +65,6 @@ function Expense() {
 
   const balance = totalIncome - totalExpense;
 
-  /* ======================
-     FORMIK CONFIG
-  ====================== */
   const initialValues = {
     title: "",
     description: "",
@@ -102,13 +87,22 @@ function Expense() {
     try {
       setSubmitting(true);
 
-      await createTransaction({
+      const formattedData = {
         ...values,
         amount: Number(values.amount),
         recurringInterval: values.isRecurring
           ? values.recurringInterval
           : null,
-      });
+      };
+
+      if (editingTransaction) {
+        await updateTransaction(editingTransaction._id, formattedData);
+        alert("Transaction updated successfully!");
+        setEditingTransaction(null);
+      } else {
+        await createTransaction(formattedData);
+        alert("Transaction created successfully!");
+      }
 
       resetForm();
       loadTransactions();
@@ -124,14 +118,9 @@ function Expense() {
     loadTransactions();
   };
 
-  /* ======================
-     UI
-  ====================== */
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-6">
-
-        {/* HEADER */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-800">
             Transactions Dashboard
@@ -141,35 +130,28 @@ function Expense() {
           </p>
         </div>
 
-        {/* SUMMARY CARDS (NOT FILTERED) */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6">
-          <SummaryCard
-            title="Total Income"
-            value={totalIncome}
-            color="text-emerald-600"
-          />
-          <SummaryCard
-            title="Total Expense"
-            value={totalExpense}
-            color="text-red-500"
-          />
-          <SummaryCard
-            title="Balance"
-            value={balance}
-            color="text-blue-600"
-          />
+          <SummaryCard title="Total Income" value={totalIncome} color="text-emerald-600" />
+          <SummaryCard title="Total Expense" value={totalExpense} color="text-red-500" />
+          <SummaryCard title="Balance" value={balance} color="text-blue-600" />
         </div>
 
-        {/* FORM + CHART */}
         <div className="grid gap-6 lg:grid-cols-2 mb-6">
-          {/* FORM */}
           <div className="bg-white p-6 rounded-xl shadow-sm border">
             <h3 className="font-semibold text-gray-700 mb-4">
-              Add Transaction
+              {editingTransaction ? "Edit Transaction" : "Add Transaction"}
             </h3>
 
             <Formik
-              initialValues={initialValues}
+              enableReinitialize
+              initialValues={
+                editingTransaction
+                  ? {
+                      ...editingTransaction,
+                      date: editingTransaction.date?.slice(0, 10),
+                    }
+                  : initialValues
+              }
               validationSchema={validationSchema}
               onSubmit={onSubmit}
             >
@@ -181,11 +163,7 @@ function Expense() {
 
                   <div>
                     <label className="text-sm text-gray-600">Type</label>
-                    <Field
-                      as="select"
-                      name="type"
-                      className="w-full border p-2 rounded-lg mt-1"
-                    >
+                    <Field as="select" name="type" className="w-full border p-2 rounded-lg mt-1">
                       <option value="expense">Expense</option>
                       <option value="income">Income</option>
                     </Field>
@@ -201,11 +179,7 @@ function Expense() {
 
                   {values.isRecurring && (
                     <div className="sm:col-span-2">
-                      <Field
-                        as="select"
-                        name="recurringInterval"
-                        className="w-full border p-2 rounded-lg"
-                      >
+                      <Field as="select" name="recurringInterval" className="w-full border p-2 rounded-lg">
                         <option value="">Select Interval</option>
                         <option value="daily">Daily</option>
                         <option value="weekly">Weekly</option>
@@ -221,7 +195,13 @@ function Expense() {
                       disabled={isSubmitting}
                       className="w-full bg-emerald-600 text-white py-2.5 rounded-lg"
                     >
-                      {isSubmitting ? "Adding..." : "Add Transaction"}
+                      {isSubmitting
+                        ? editingTransaction
+                          ? "Updating..."
+                          : "Adding..."
+                        : editingTransaction
+                        ? "Update Transaction"
+                        : "Add Transaction"}
                     </button>
                   </div>
                 </Form>
@@ -229,60 +209,15 @@ function Expense() {
             </Formik>
           </div>
 
-          {/* CHART (NOT FILTERED) */}
           <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <h3 className="font-semibold text-gray-700 mb-4">
-              Overview
-            </h3>
+            <h3 className="font-semibold text-gray-700 mb-4">Overview</h3>
             <ExpenseChart transactions={transactions} />
           </div>
         </div>
 
-        {/* TABLE FILTERS */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border mb-4 grid sm:grid-cols-4 gap-4">
-          <select
-            className="border p-2 rounded"
-            onChange={(e) =>
-              setFilters({ ...filters, type: e.target.value })
-            }
-          >
-            <option value="">All Types</option>
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-          </select>
-
-          <input
-            type="text"
-            placeholder="Category"
-            className="border p-2 rounded"
-            onChange={(e) =>
-              setFilters({ ...filters, category: e.target.value })
-            }
-          />
-
-          <input
-            type="date"
-            className="border p-2 rounded"
-            onChange={(e) =>
-              setFilters({ ...filters, startDate: e.target.value })
-            }
-          />
-
-          <input
-            type="date"
-            className="border p-2 rounded"
-            onChange={(e) =>
-              setFilters({ ...filters, endDate: e.target.value })
-            }
-          />
-        </div>
-
-        {/* TRANSACTION TABLE (FILTERED ONLY HERE) */}
         <div className="bg-white rounded-xl shadow-sm border">
           <div className="p-4 border-b">
-            <h3 className="font-semibold text-gray-700">
-              Transactions
-            </h3>
+            <h3 className="font-semibold text-gray-700">Transactions</h3>
           </div>
 
           <div className="overflow-x-auto">
@@ -295,7 +230,8 @@ function Expense() {
                   <th className="p-4 text-left">Amount</th>
                   <th className="p-4 text-left">Date</th>
                   <th className="p-4 text-left">Recurring</th>
-                  <th></th>
+                  <th className="p-4 text-left">Edit</th>
+                  <th className="p-4 text-left">Delete</th>
                 </tr>
               </thead>
 
@@ -306,15 +242,21 @@ function Expense() {
                     <td className="p-4">{t.category}</td>
                     <td className="p-4">{t.type}</td>
                     <td className="p-4 font-semibold">₹{t.amount}</td>
+                    <td className="p-4">{t.date?.slice(0, 10)}</td>
                     <td className="p-4">
-                      {t.date?.slice(0, 10)}
+                      {t.isRecurring ? `Yes (${t.recurringInterval})` : "No"}
                     </td>
-                    <td className="p-4">
-                      {t.isRecurring
-                        ? `Yes (${t.recurringInterval})`
-                        : "No"}
+
+                    <td className="p-4 text-center">
+                      <button
+                        onClick={() => setEditingTransaction(t)}
+                        className="text-blue-500 hover:text-blue-700"
+                      >
+                        <Pencil size={18} />
+                      </button>
                     </td>
-                    <td className="p-4">
+
+                    <td className="p-4 text-center">
                       <Trash2
                         className="text-red-500 cursor-pointer"
                         onClick={() => handleDelete(t._id)}
