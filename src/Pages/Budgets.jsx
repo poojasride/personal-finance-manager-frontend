@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getBudgets, createBudget } from "../api/budgetApi";
+import { getBudgets, createBudget, deleteBudget } from "../api/budgetApi";
+import { getTransactions } from "../api/transactionApi";
 import BudgetDonutChart from "../components/BudgetDonutChart";
 import { Trash2 } from "lucide-react";
 
@@ -7,24 +8,72 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
 function Budgets() {
-
   const [budgets, setBudgets] = useState([]);
+  const [transactions, setTransactions] = useState([]);
 
-  // Load budgets when page loads
   useEffect(() => {
     loadBudgets();
+    loadTransactions();
   }, []);
 
   const loadBudgets = async () => {
     try {
-      const res = await getBudgets();
+      const data = await getBudgets();
       setBudgets(data);
     } catch (err) {
       console.log(err);
     }
   };
 
-  // ✅ Step 1: Initial values
+  const loadTransactions = async () => {
+    try {
+      const data = await getTransactions();
+      setTransactions(data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // 🔥 Attach spent + status logic
+  const budgetsWithTracking = budgets.map((budget) => {
+    const spent = transactions.data
+      .filter(
+        (t) =>
+          t.type === "expense" &&
+          t.category === budget.category &&
+          new Date(t.date) >= new Date(budget.startDate) &&
+          new Date(t.date) <= new Date(budget.endDate),
+      )
+      .reduce((acc, t) => acc + t.amount, 0);
+
+    const remaining = budget.limitAmount - spent;
+    const percentage = (spent / budget.limitAmount) * 100;
+
+    let status = "Safe";
+    if (percentage >= 100) status = "Exceeded";
+    else if (percentage >= 80) status = "Warning";
+
+    return {
+      ...budget,
+      spent,
+      remaining,
+      percentage,
+      status,
+    };
+  });
+
+  const totalBudget = budgetsWithTracking.reduce(
+    (acc, item) => acc + item.limitAmount,
+    0,
+  );
+
+  const totalSpent = budgetsWithTracking.reduce(
+    (acc, item) => acc + item.spent,
+    0,
+  );
+
+  const remaining = totalBudget - totalSpent;
+
   const initialValues = {
     category: "",
     limitAmount: "",
@@ -33,197 +82,125 @@ function Budgets() {
     endDate: "",
   };
 
-  // ✅ Step 2: Validation schema
   const validationSchema = Yup.object({
-
-    category: Yup.string()
-      .min(3, "Category must be at least 3 characters")
-      .required("Category is required"),
-
-    limitAmount: Yup.number()
-      .typeError("Amount must be a number")
-      .positive("Amount must be greater than 0")
-      .required("Amount is required"),
-
-    period: Yup.string()
-      .required("Period is required"),
-
-    startDate: Yup.date()
-      .required("Start date is required"),
-
+    category: Yup.string().min(3).required("Category required"),
+    limitAmount: Yup.number().positive().required("Amount required"),
+    period: Yup.string().required(),
+    startDate: Yup.date().required(),
     endDate: Yup.date()
-      .min(
-        Yup.ref("startDate"),
-        "End date must be after start date"
-      )
-      .required("End date is required"),
+      .min(Yup.ref("startDate"), "End date must be after start date")
+      .required(),
   });
 
-  // ✅ Step 3: Submit function
-  const onSubmit = async (values, { resetForm, setSubmitting }) => {
-
+  const onSubmit = async (values, { resetForm }) => {
     try {
+     await createBudget(values);
 
-      setSubmitting(true);
-
-      await createBudget(values);
-
-      alert("Budget created successfully");
-
+      alert("Budget created successfully!")
       resetForm();
-
       loadBudgets();
-
-    } catch (error) {
-
-      console.log(error);
-      alert("Error creating budget");
-
-    } finally {
-
-      setSubmitting(false);
-
+    } catch (err) {
+      console.log(err);
     }
-
   };
 
-  // Summary calculations
-  const totalBudget = budgets.reduce(
-    (acc, item) => acc + item.limitAmount,
-    0
-  );
+  const getStatusColor = (status) => {
+    if (status === "Safe") return "bg-emerald-500";
+    if (status === "Warning") return "bg-yellow-500";
+    return "bg-red-500";
+  };
 
-  const totalSpent = budgets.reduce(
-    (acc, item) => acc + (item.spent || 0),
-    0
-  );
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this budget?",
+    );
 
-  const remaining = totalBudget - totalSpent;
+    if (!confirmDelete) return;
+
+    try {
+      await deleteBudget(id);
+      loadBudgets(); // reload list
+    } catch (error) {
+      console.log(error);
+      alert("Error deleting budget");
+    }
+  };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Budget Dashboard
-        </h1>
-        <p className="text-gray-500">
-          Manage your budget professionally
-        </p>
-      </div>
+      <h1 className="text-3xl font-bold mb-6">Budget Dashboard</h1>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-
         <div className="bg-white p-5 rounded-xl shadow">
-          <p className="text-gray-500 text-sm">Total Budget</p>
-          <h2 className="text-2xl font-bold mt-1">
-            ₹{totalBudget}
-          </h2>
+          <p>Total Budget</p>
+          <h2 className="text-2xl font-bold">₹{totalBudget}</h2>
         </div>
 
         <div className="bg-white p-5 rounded-xl shadow">
-          <p className="text-gray-500 text-sm">Total Spent</p>
-          <h2 className="text-2xl font-bold text-red-500 mt-1">
-            ₹{totalSpent}
-          </h2>
+          <p>Total Spent</p>
+          <h2 className="text-2xl font-bold text-red-500">₹{totalSpent}</h2>
         </div>
 
         <div className="bg-white p-5 rounded-xl shadow">
-          <p className="text-gray-500 text-sm">Remaining Budget</p>
-          <h2 className="text-2xl font-bold text-emerald-600 mt-1">
-            ₹{remaining}
-          </h2>
+          <p>Remaining</p>
+          <h2 className="text-2xl font-bold text-emerald-600">₹{remaining}</h2>
         </div>
-
       </div>
 
       {/* Form + Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-
-        {/* ✅ FORM */}
+        {/* FORM */}
         <div className="bg-white p-6 rounded-xl shadow">
-
-          <h3 className="font-semibold text-gray-700 mb-4">
-            Add Budget
-          </h3>
+          <h3 className="mb-4 font-semibold">Add Budget</h3>
 
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={onSubmit}
           >
-            {({ isSubmitting }) => (
+            <Form className="space-y-4">
+              <label className="text-sm text-gray-600">Category</label>
+              <Field
+                name="category"
+                placeholder="Food, Rent, Travel"
+                className="w-full border p-2 rounded-lg mt-1"
+              />
+              <ErrorMessage
+                name="category"
+                component="div"
+                className="text-red-500 text-sm"
+              />
+              <label className="text-sm text-gray-600">Amount</label>
 
-              <Form className="space-y-4">
+              <Field
+                name="limitAmount"
+                type="number"
+                placeholder="5000"
+                className="w-full border p-2 rounded-lg mt-1"
+              />
 
-                {/* Category */}
-                <div>
-                  <label className="text-sm text-gray-600">
-                    Category
-                  </label>
-
-                  <Field
-                    name="category"
-                    type="text"
-                    placeholder="Food, Rent, Travel"
-                    className="w-full border p-2 rounded-lg mt-1"
-                  />
-
-                  <ErrorMessage
-                    name="category"
-                    component="div"
-                    className="text-red-500 text-sm"
-                  />
-                </div>
-
-                {/* Amount */}
-                <div>
-                  <label className="text-sm text-gray-600">
-                    Amount
-                  </label>
-
-                  <Field
-                    name="limitAmount"
-                    type="number"
-                    placeholder="5000"
-                    className="w-full border p-2 rounded-lg mt-1"
-                  />
-
-                  <ErrorMessage
-                    name="limitAmount"
-                    component="div"
-                    className="text-red-500 text-sm"
-                  />
-                </div>
-
-                {/* Period */}
-                <div>
-                  <label className="text-sm text-gray-600">
-                    Period
-                  </label>
-
-                  <Field
-                    as="select"
-                    name="period"
-                    className="w-full border p-2 rounded-lg mt-1"
-                  >
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly">Yearly</option>
-                  </Field>
-
-                  <ErrorMessage
-                    name="period"
-                    component="div"
-                    className="text-red-500 text-sm"
-                  />
-                </div>
-
-                {/* Dates */}
-                <div className="grid grid-cols-2 gap-4">
-
-                  <div>
+              <ErrorMessage
+                name="limitAmount"
+                component="div"
+                className="text-red-500 text-sm"
+              />
+              <label className="text-sm text-gray-600">Period</label>
+              <Field
+                as="select"
+                name="period"
+                className="w-full border p-2 rounded-lg mt-1"
+              >
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </Field>
+              <ErrorMessage
+                name="period"
+                component="div"
+                className="text-red-500 text-sm"
+              />
+              <div className="grid grid-cols-2 gap-4">
+               <div>
                     <label className="text-sm text-gray-600">
                       Start Date
                     </label>
@@ -259,82 +236,88 @@ function Budgets() {
                     />
                   </div>
 
-                </div>
+              </div>
 
-                {/* Submit */}
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700"
-                >
-                  {isSubmitting ? "Creating..." : "Create Budget"}
-                </button>
-
-              </Form>
-
-            )}
+              <button
+                type="submit"
+                className="w-full bg-emerald-600 text-white py-2 rounded"
+              >
+                Create Budget
+              </button>
+            </Form>
           </Formik>
-
         </div>
 
-        {/* Chart */}
+        {/* CHART */}
         <div className="bg-white p-6 rounded-xl shadow">
-
-          <h3 className="font-semibold text-gray-700 mb-4">
-            Budget Overview
-          </h3>
-
-          <BudgetDonutChart budgets={budgets} />
-
+          <h3 className="mb-4 font-semibold">Budget Overview</h3>
+          <BudgetDonutChart budgets={budgetsWithTracking} />
         </div>
-
       </div>
 
-      {/* Table */}
+      {/* Budget Monitoring Table */}
       <div className="bg-white rounded-xl shadow">
-
         <div className="p-5 border-b">
-          <h3 className="font-semibold text-gray-700">
-            Budget List
-          </h3>
+          <h3 className="font-semibold">Budget Monitoring</h3>
         </div>
 
-        <table className="w-full">
+        <table className="w-full text-left">
+          <thead>
+            <tr className="border-b bg-gray-100">
+              <th className="p-4">Category</th>
+              <th className="p-4">Limit</th>
+              <th className="p-4">Spent</th>
+              <th className="p-4">Remaining</th>
+              <th className="p-4">Progress</th>
+              <th className="p-4">Status</th>
+              <th className="p-4">Action</th>
+            </tr>
+          </thead>
 
           <tbody>
-
-            {budgets.map((budget) => (
-
+            {budgetsWithTracking.map((budget) => (
               <tr key={budget._id} className="border-t">
-
                 <td className="p-4">{budget.category}</td>
-
                 <td className="p-4">₹{budget.limitAmount}</td>
+                <td className="p-4 text-red-500">₹{budget.spent}</td>
+                <td className="p-4 text-emerald-600">₹{budget.remaining}</td>
 
-                <td className="p-4">{budget.period}</td>
-
-                <td className="p-4">
-                  {budget.startDate?.slice(0, 10)}
+                <td className="p-4 w-64">
+                  <div className="w-full bg-gray-200 h-3 rounded-full">
+                    <div
+                      className={`${getStatusColor(
+                        budget.status,
+                      )} h-3 rounded-full`}
+                      style={{
+                        width: `${Math.min(budget.percentage, 100)}%`,
+                      }}
+                    ></div>
+                  </div>
                 </td>
 
                 <td className="p-4">
-                  {budget.endDate?.slice(0, 10)}
+                  <span
+                    className={`px-3 py-1 text-white rounded-full text-sm ${getStatusColor(
+                      budget.status,
+                    )}`}
+                  >
+                    {budget.status}
+                  </span>
                 </td>
 
-                <td className="p-4">
-                  <Trash2 className="text-red-500 cursor-pointer" />
+                <td className="p-4 text-center">
+                  <button
+                    onClick={() => handleDelete(budget._id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </td>
-
               </tr>
-
             ))}
-
           </tbody>
-
         </table>
-
       </div>
-
     </div>
   );
 }
