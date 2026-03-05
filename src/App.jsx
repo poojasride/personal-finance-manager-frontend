@@ -13,7 +13,7 @@ import Budgets from "./Pages/Budgets";
 import Transactions from "./Pages/Transactions";
 import Goals from "./Pages/Goals";
 import Analytics from "./Pages/Analytics";
-import Accounts from "./Pages/Accounts";
+
 import Recurring from "./Pages/Recurring";
 import Categories from "./Pages/Categories";
 import Export from "./Pages/Export";
@@ -50,9 +50,8 @@ function App() {
 
           <Route path="/analytics" element={<Analytics />} />
 
-           <Route path="/recurring" element={<Recurring />} />
+          <Route path="/recurring" element={<Recurring />} />
           <Route path="/categories" element={<Categories />} />
-            
 
           <Route path="/settings" element={<Settings />} />
 

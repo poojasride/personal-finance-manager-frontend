@@ -40,7 +40,7 @@ function Budgets() {
     }
   };
 
-  // 🔥 Attach spent + status logic
+  // Attach spent + status logic
   const budgetsWithTracking = budgets.map((budget) => {
     const spent = transactions.data
       .filter(
@@ -131,7 +131,7 @@ function Budgets() {
 
     try {
       await deleteBudget(id);
-      loadBudgets(); // reload list
+      loadBudgets();
     } catch (error) {
       console.log(error);
       alert("Error deleting budget");
@@ -139,32 +139,26 @@ function Budgets() {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">Budget Dashboard</h1>
+    <div className="p-8 bg-gray-50 min-h-screen">
+      {/* HEADER */}
+      <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
+        Budget Dashboard
+      </h1>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-white p-5 rounded-xl shadow">
-          <p>Total Budget</p>
-          <h2 className="text-2xl font-bold">₹{totalBudget}</h2>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow">
-          <p>Total Spent</p>
-          <h2 className="text-2xl font-bold text-red-500">₹{totalSpent}</h2>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl shadow">
-          <p>Remaining</p>
-          <h2 className="text-2xl font-bold text-emerald-600">₹{remaining}</h2>
-        </div>
+      {/* SUMMARY CARDS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <SummaryCard title="Total Budget" value={totalBudget} />
+        <SummaryCard title="Total Spent" value={totalSpent} color="text-red-500" />
+        <SummaryCard title="Remaining" value={remaining} color="text-emerald-600" />
       </div>
 
-      {/* Form + Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* FORM */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="mb-4 font-semibold">Add Budget</h3>
+      {/* FORM + CHART */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        {/* FORM CARD */}
+        <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-gray-100">
+          <h3 className="text-lg font-semibold mb-6">
+            {editingBudget ? "Edit Budget" : "Add Budget"}
+          </h3>
 
           <Formik
             enableReinitialize
@@ -172,180 +166,164 @@ function Budgets() {
             validationSchema={validationSchema}
             onSubmit={onSubmit}
           >
-            {({ values, isSubmitting }) => (
-            <Form className="space-y-4">
-              <label className="text-sm text-gray-600">Category</label>
-              <Field
-                name="category"
-                placeholder="Food, Rent, Travel"
-                className="w-full border p-2 rounded-lg mt-1"
-              />
-              <ErrorMessage
-                name="category"
-                component="div"
-                className="text-red-500 text-sm"
-              />
-              <label className="text-sm text-gray-600">Amount</label>
+            {({ isSubmitting }) => (
+              <Form className="space-y-4">
 
-              <Field
-                name="limitAmount"
-                type="number"
-                placeholder="5000"
-                className="w-full border p-2 rounded-lg mt-1"
-              />
+                <FormInput name="category" label="Category" placeholder="Food, Rent, Travel" />
+                <FormInput name="limitAmount" label="Amount" type="number" placeholder="5000" />
 
-              <ErrorMessage
-                name="limitAmount"
-                component="div"
-                className="text-red-500 text-sm"
-              />
-              <label className="text-sm text-gray-600">Period</label>
-              <Field
-                as="select"
-                name="period"
-                className="w-full border p-2 rounded-lg mt-1"
-              >
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-              </Field>
-              <ErrorMessage
-                name="period"
-                component="div"
-                className="text-red-500 text-sm"
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-gray-600">Start Date</label>
+                <SelectField name="period" label="Period">
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </SelectField>
 
-                  <Field
-                    type="date"
-                    name="startDate"
-                    className="w-full border p-2 rounded-lg mt-1"
-                  />
-
-                  <ErrorMessage
-                    name="startDate"
-                    component="div"
-                    className="text-red-500 text-sm"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormInput name="startDate" label="Start Date" type="date" full />
+                  <FormInput name="endDate" label="End Date" type="date" full />
                 </div>
 
-                <div>
-                  <label className="text-sm text-gray-600">End Date</label>
-
-                  <Field
-                    type="date"
-                    name="endDate"
-                    className="w-full border p-2 rounded-lg mt-1"
-                  />
-
-                  <ErrorMessage
-                    name="endDate"
-                    component="div"
-                    className="text-red-500 text-sm"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-emerald-600 text-white py-2 rounded"
-              >
-               {isSubmitting
-                        ? editingBudget
-                          ? "Updating..."
-                          : "Adding..."
-                        : editingBudget
-                          ? "Update Budget"
-                          : "Add Budget"}
-              </button>
-            </Form>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-medium shadow-md hover:shadow-xl transition duration-300"
+                >
+                  {isSubmitting
+                    ? editingBudget
+                      ? "Updating..."
+                      : "Adding..."
+                    : editingBudget
+                      ? "Update Budget"
+                      : "Add Budget"}
+                </button>
+              </Form>
             )}
           </Formik>
         </div>
 
-        {/* CHART */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="mb-4 font-semibold">Budget Overview</h3>
+        {/* CHART CARD */}
+        <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-gray-100">
+          <h3 className="text-lg font-semibold mb-6">Budget Overview</h3>
           <BudgetDonutChart budgets={budgetsWithTracking} />
         </div>
       </div>
 
-      {/* Budget Monitoring Table */}
-      <div className="bg-white rounded-xl shadow">
-        <div className="p-5 border-b">
-          <h3 className="font-semibold">Budget Monitoring</h3>
+      {/* BUDGET MONITORING TABLE */}
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="p-6 border-b">
+          <h3 className="font-semibold text-gray-700">Budget Monitoring</h3>
         </div>
 
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b bg-gray-100">
-              <th className="p-4">Category</th>
-              <th className="p-4">Limit</th>
-              <th className="p-4">Spent</th>
-              <th className="p-4">Remaining</th>
-              <th className="p-4">Progress</th>
-              <th className="p-4">Status</th>
-              <th className="p-4">Edit</th>
-              <th className="p-4">Delete</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {budgetsWithTracking.map((budget) => (
-              <tr key={budget._id} className="border-t">
-                <td className="p-4">{budget.category}</td>
-                <td className="p-4">₹{budget.limitAmount}</td>
-                <td className="p-4 text-red-500">₹{budget.spent}</td>
-                <td className="p-4 text-emerald-600">₹{budget.remaining}</td>
-
-                <td className="p-4 w-64">
-                  <div className="w-full bg-gray-200 h-3 rounded-full">
-                    <div
-                      className={`${getStatusColor(
-                        budget.status,
-                      )} h-3 rounded-full`}
-                      style={{
-                        width: `${Math.min(budget.percentage, 100)}%`,
-                      }}
-                    ></div>
-                  </div>
-                </td>
-
-                <td className="p-4">
-                  <span
-                    className={`px-3 py-1 text-white rounded-full text-sm ${getStatusColor(
-                      budget.status,
-                    )}`}
-                  >
-                    {budget.status}
-                  </span>
-                </td>
-
-                <td className="p-4 text-center space-x-3">
-                  <button
-                    onClick={() => setEditingBudget(budget)}
-                    className="text-blue-500 hover:text-blue-700 text-sm"
-                  >
-                    <Pencil size={18}/>
-                  </button>
-                </td>
-
-                <td className="p-4 text-center">
-                  <button
-                    onClick={() => handleDelete(budget._id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-gray-500 uppercase tracking-wide text-xs">
+              <tr>
+                <th className="p-4 text-left">Category</th>
+                <th className="p-4 text-left">Limit</th>
+                <th className="p-4 text-left">Spent</th>
+                <th className="p-4 text-left">Remaining</th>
+                <th className="p-4 text-left">Progress</th>
+                <th className="p-4 text-left">Status</th>
+                <th className="p-4 text-center">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {budgetsWithTracking.map((budget) => (
+                <tr
+                  key={budget._id}
+                  className="border-t hover:bg-gray-50 transition"
+                >
+                  <td className="p-4 font-medium text-gray-700">{budget.category}</td>
+                  <td className="p-4">₹{budget.limitAmount}</td>
+                  <td className="p-4 text-red-500">₹{budget.spent}</td>
+                  <td className="p-4 text-emerald-600">₹{budget.remaining}</td>
+
+                  <td className="p-4 w-64">
+                    <div className="w-full bg-gray-200 h-3 rounded-full">
+                      <div
+                        className={`${getStatusColor(budget.status)} h-3 rounded-full`}
+                        style={{ width: `${Math.min(budget.percentage, 100)}%` }}
+                      ></div>
+                    </div>
+                  </td>
+
+                  <td className="p-4">
+                    <span
+                      className={`px-3 py-1 text-white rounded-full text-sm ${getStatusColor(budget.status)}`}
+                    >
+                      {budget.status}
+                    </span>
+                  </td>
+
+                  <td className="p-4 flex justify-center gap-4">
+                    <button
+                      onClick={() => setEditingBudget(budget)}
+                      className="text-blue-500 hover:text-blue-700 transition"
+                    >
+                      <Pencil size={18} />
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(budget._id)}
+                      className="text-red-500 hover:text-red-700 transition"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
 }
 
 export default Budgets;
+
+/* =======================
+   REUSABLE COMPONENTS
+======================= */
+function SummaryCard({ title, value, color = "text-gray-700" }) {
+  return (
+    <div className="bg-white/90 backdrop-blur-md p-6 rounded-2xl shadow-md border border-gray-100 hover:shadow-xl transition duration-300">
+      <p className="text-sm text-gray-500">{title}</p>
+      <h2 className={`text-2xl font-bold mt-1 ${color}`}>₹{value}</h2>
+    </div>
+  );
+}
+
+function FormInput({ name, label, type = "text", placeholder, full }) {
+  return (
+    <div className={full ? "sm:col-span-2" : ""}>
+      <label className="text-sm font-medium text-gray-600">{label}</label>
+      <Field
+        name={name}
+        type={type}
+        placeholder={placeholder}
+        className="w-full mt-2 px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-400 focus:outline-none transition"
+      />
+      <ErrorMessage
+        name={name}
+        component="div"
+        className="text-red-500 text-xs mt-1"
+      />
+    </div>
+  );
+}
+
+function SelectField({ name, label, children, full }) {
+  return (
+    <div className={full ? "sm:col-span-2" : ""}>
+      <label className="text-sm font-medium text-gray-600">{label}</label>
+      <Field
+        as="select"
+        name={name}
+        className="w-full mt-2 px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-400 focus:outline-none transition"
+      >
+        {children}
+      </Field>
+    </div>
+  );
+}

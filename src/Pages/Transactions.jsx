@@ -38,19 +38,15 @@ function Expense() {
   const filteredTransactions = useMemo(() => {
     return transactions.filter((t) => {
       if (filters.type && t.type !== filters.type) return false;
-
       if (
         filters.category &&
         !t.category.toLowerCase().includes(filters.category.toLowerCase())
       )
         return false;
-
       if (filters.startDate && new Date(t.date) < new Date(filters.startDate))
         return false;
-
       if (filters.endDate && new Date(t.date) > new Date(filters.endDate))
         return false;
-
       return true;
     });
   }, [transactions, filters]);
@@ -119,26 +115,44 @@ function Expense() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+
+        {/* HEADER */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
             Transactions Dashboard
           </h1>
-          <p className="text-gray-500">
-            Track your income and expenses professionally
+          <p className="text-gray-500 mt-1">
+            Track, analyze and manage your finances professionally
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6">
-          <SummaryCard title="Total Income" value={totalIncome} color="text-emerald-600" />
-          <SummaryCard title="Total Expense" value={totalExpense} color="text-red-500" />
-          <SummaryCard title="Balance" value={balance} color="text-blue-600" />
+        {/* SUMMARY CARDS */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+          <SummaryCard
+            title="Total Income"
+            value={totalIncome}
+            color="text-emerald-600"
+          />
+          <SummaryCard
+            title="Total Expense"
+            value={totalExpense}
+            color="text-red-500"
+          />
+          <SummaryCard
+            title="Balance"
+            value={balance}
+            color="text-blue-600"
+          />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2 mb-6">
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <h3 className="font-semibold text-gray-700 mb-4">
+        {/* FORM + CHART */}
+        <div className="grid gap-8 lg:grid-cols-2 mb-8">
+
+          {/* FORM CARD */}
+          <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-700 mb-6">
               {editingTransaction ? "Edit Transaction" : "Add Transaction"}
             </h3>
 
@@ -156,44 +170,54 @@ function Expense() {
               onSubmit={onSubmit}
             >
               {({ values, isSubmitting }) => (
-                <Form className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Form className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
                   <FormInput name="title" label="Title" full />
                   <FormInput name="description" label="Description" full />
                   <FormInput name="amount" label="Amount" type="number" />
 
-                  <div>
-                    <label className="text-sm text-gray-600">Type</label>
-                    <Field as="select" name="type" className="w-full border p-2 rounded-lg mt-1">
-                      <option value="expense">Expense</option>
-                      <option value="income">Income</option>
-                    </Field>
-                  </div>
+                  <SelectField name="type" label="Type">
+                    <option value="expense">Expense</option>
+                    <option value="income">Income</option>
+                  </SelectField>
 
                   <FormInput name="category" label="Category" />
                   <FormInput name="date" label="Date" type="date" />
 
-                  <div className="flex items-center gap-2 sm:col-span-2">
-                    <Field type="checkbox" name="isRecurring" />
-                    <label className="text-sm">Recurring</label>
+                  <div className="flex items-center gap-3 sm:col-span-2">
+                    <Field
+                      type="checkbox"
+                      name="isRecurring"
+                      className="h-4 w-4 accent-emerald-600"
+                    />
+                    <label className="text-sm text-gray-600">
+                      Recurring Transaction
+                    </label>
                   </div>
 
                   {values.isRecurring && (
-                    <div className="sm:col-span-2">
-                      <Field as="select" name="recurringInterval" className="w-full border p-2 rounded-lg">
-                        <option value="">Select Interval</option>
-                        <option value="daily">Daily</option>
-                        <option value="weekly">Weekly</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="yearly">Yearly</option>
-                      </Field>
-                    </div>
+                    <SelectField
+                      name="recurringInterval"
+                      label="Recurring Interval"
+                      full
+                    >
+                      <option value="">Select Interval</option>
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </SelectField>
                   )}
 
                   <div className="sm:col-span-2">
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-emerald-600 text-white py-2.5 rounded-lg"
+                      className="w-full py-3 rounded-xl
+                        bg-gradient-to-r from-emerald-500 to-teal-500
+                        text-white font-medium
+                        shadow-md hover:shadow-xl
+                        transition duration-300"
                     >
                       {isSubmitting
                         ? editingTransaction
@@ -204,25 +228,33 @@ function Expense() {
                         : "Add Transaction"}
                     </button>
                   </div>
+
                 </Form>
               )}
             </Formik>
           </div>
 
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <h3 className="font-semibold text-gray-700 mb-4">Overview</h3>
+          {/* CHART CARD */}
+          <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-gray-100">
+            <h3 className="text-lg font-semibold text-gray-700 mb-6">
+              Overview
+            </h3>
             <ExpenseChart transactions={transactions} />
           </div>
+
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border">
-          <div className="p-4 border-b">
-            <h3 className="font-semibold text-gray-700">Transactions</h3>
+        {/* TABLE */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+          <div className="p-6 border-b">
+            <h3 className="text-lg font-semibold text-gray-700">
+              Transactions
+            </h3>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 text-sm text-gray-500">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-gray-500 uppercase tracking-wide text-xs">
                 <tr>
                   <th className="p-4 text-left">Title</th>
                   <th className="p-4 text-left">Category</th>
@@ -230,37 +262,62 @@ function Expense() {
                   <th className="p-4 text-left">Amount</th>
                   <th className="p-4 text-left">Date</th>
                   <th className="p-4 text-left">Recurring</th>
-                  <th className="p-4 text-left">Edit</th>
-                  <th className="p-4 text-left">Delete</th>
+                  <th className="p-4 text-center">Actions</th>
                 </tr>
               </thead>
 
               <tbody>
                 {filteredTransactions.map((t) => (
-                  <tr key={t._id} className="border-t">
-                    <td className="p-4">{t.title}</td>
+                  <tr
+                    key={t._id}
+                    className="border-t hover:bg-gray-50 transition"
+                  >
+                    <td className="p-4 font-medium text-gray-700">
+                      {t.title}
+                    </td>
                     <td className="p-4">{t.category}</td>
-                    <td className="p-4">{t.type}</td>
-                    <td className="p-4 font-semibold">₹{t.amount}</td>
-                    <td className="p-4">{t.date?.slice(0, 10)}</td>
+
                     <td className="p-4">
-                      {t.isRecurring ? `Yes (${t.recurringInterval})` : "No"}
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium
+                          ${
+                            t.type === "income"
+                              ? "bg-emerald-100 text-emerald-600"
+                              : "bg-red-100 text-red-600"
+                          }`}
+                      >
+                        {t.type}
+                      </span>
                     </td>
 
-                    <td className="p-4 text-center">
+                    <td className="p-4 font-semibold">
+                      ₹{t.amount}
+                    </td>
+
+                    <td className="p-4">
+                      {t.date?.slice(0, 10)}
+                    </td>
+
+                    <td className="p-4">
+                      {t.isRecurring
+                        ? `Yes (${t.recurringInterval})`
+                        : "No"}
+                    </td>
+
+                    <td className="p-4 flex justify-center gap-4">
                       <button
                         onClick={() => setEditingTransaction(t)}
-                        className="text-blue-500 hover:text-blue-700"
+                        className="text-blue-500 hover:text-blue-700 transition"
                       >
                         <Pencil size={18} />
                       </button>
-                    </td>
 
-                    <td className="p-4 text-center">
-                      <Trash2
-                        className="text-red-500 cursor-pointer"
+                      <button
                         onClick={() => handleDelete(t._id)}
-                      />
+                        className="text-red-500 hover:text-red-700 transition"
+                      >
+                        <Trash2 size={18} />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -268,12 +325,13 @@ function Expense() {
             </table>
 
             {filteredTransactions.length === 0 && (
-              <div className="p-6 text-center text-gray-500">
+              <div className="p-8 text-center text-gray-500">
                 No transactions found
               </div>
             )}
           </div>
         </div>
+
       </div>
     </div>
   );
@@ -281,15 +339,13 @@ function Expense() {
 
 export default Expense;
 
-/* ======================
-   REUSABLE COMPONENTS
-====================== */
+/* ====================== COMPONENTS ====================== */
 
 function SummaryCard({ title, value, color }) {
   return (
-    <div className="bg-white p-5 rounded-xl shadow-sm border">
+    <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100 hover:shadow-xl transition duration-300">
       <p className="text-sm text-gray-500">{title}</p>
-      <h2 className={`text-2xl font-bold mt-1 ${color}`}>
+      <h2 className={`text-3xl font-bold mt-2 ${color}`}>
         ₹{value}
       </h2>
     </div>
@@ -299,19 +355,42 @@ function SummaryCard({ title, value, color }) {
 function FormInput({ name, label, type = "text", full }) {
   return (
     <div className={full ? "sm:col-span-2" : ""}>
-      <label className="text-sm text-gray-600">{label}</label>
-
+      <label className="text-sm font-medium text-gray-600">
+        {label}
+      </label>
       <Field
         name={name}
         type={type}
-        className="w-full border p-2 rounded-lg mt-1"
+        className="w-full mt-2 px-4 py-2.5 rounded-xl
+          border border-gray-200
+          focus:ring-2 focus:ring-emerald-400
+          focus:outline-none transition"
       />
-
       <ErrorMessage
         name={name}
         component="div"
-        className="text-red-500 text-sm"
+        className="text-red-500 text-xs mt-1"
       />
+    </div>
+  );
+}
+
+function SelectField({ name, label, children, full }) {
+  return (
+    <div className={full ? "sm:col-span-2" : ""}>
+      <label className="text-sm font-medium text-gray-600">
+        {label}
+      </label>
+      <Field
+        as="select"
+        name={name}
+        className="w-full mt-2 px-4 py-2.5 rounded-xl
+          border border-gray-200
+          focus:ring-2 focus:ring-emerald-400
+          focus:outline-none transition"
+      >
+        {children}
+      </Field>
     </div>
   );
 }

@@ -9,7 +9,6 @@ import {
   BarChart3,
   Repeat,
   Tags,
-  CreditCard,
   PlusCircle,
   Download,
   Settings,
@@ -20,161 +19,176 @@ import {
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const location = useLocation();
 
-  // Function to check active page
+  // Active class (UI upgraded only)
   const activeClass = (path) => {
     return location.pathname === path
-      ? "bg-emerald-100 text-emerald-600 font-semibold"
-      : "text-gray-600 hover:bg-gray-100";
+      ? "bg-emerald-50 text-emerald-600 border-l-4 border-emerald-500 shadow-sm"
+      : "text-gray-500 hover:bg-gray-50 hover:text-gray-800";
   };
 
   return (
     <>
-      {/* Mobile background overlay */}
+      {/* Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/40 lg:hidden"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm lg:hidden z-40"
           onClick={() => setIsOpen(false)}
-        ></div>
+        />
       )}
 
       {/* Sidebar */}
       <aside
         className={`
-    fixed top-16 left-0 z-50
-    w-64 h-[calc(100vh-64px)]
-    bg-white border-r shadow-sm
+        fixed top-16 left-0 z-50
+        w-72 h-[calc(100vh-64px)]
+        bg-white/95 backdrop-blur-md
+        border-r border-gray-200
+        shadow-xl
 
-    flex flex-col justify-between
+        flex flex-col justify-between
 
-    transform transition-transform duration-300
-
-    ${isOpen ? "translate-x-0" : "-translate-x-full"}
-
-    lg:translate-x-0
-  `}
+        transform transition-transform duration-300 ease-in-out
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
+        lg:translate-x-0
+      `}
       >
-        {/* Top section */}
-        <div className="p-4 overflow-y-auto">
-          {/* Mobile close button */}
-          <div className="flex justify-between items-center mb-4 lg:hidden">
-            <h2 className="font-bold text-emerald-600">Finance Tracker</h2>
+        {/* Top Section */}
+        <div className="p-6 overflow-y-auto">
 
-            <button onClick={() => setIsOpen(false)}>
+          {/* Mobile Header */}
+          <div className="flex justify-between items-center mb-6 lg:hidden">
+            <h2 className="text-lg font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
+              Finance Tracker
+            </h2>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="p-2 rounded-md hover:bg-gray-100"
+            >
               <X size={20} />
             </button>
           </div>
 
-          {/* Add Transaction button */}
+          {/* Add Transaction Button */}
           <Link
             to="/transactions"
             onClick={() => setIsOpen(false)}
-            className="flex items-center gap-3 bg-emerald-500 text-white p-3 rounded-lg mb-4 hover:bg-emerald-600"
+            className="flex items-center justify-center gap-3
+              bg-gradient-to-r from-emerald-500 to-teal-500
+              text-white font-medium
+              p-3 rounded-xl mb-6
+              shadow-md hover:shadow-lg
+              transition duration-300"
           >
             <PlusCircle size={20} />
             Add Transaction
           </Link>
 
-          {/* Menu items */}
+          {/* Navigation Menu */}
+          <nav className="space-y-2 text-sm">
 
-          <Link
-            to="/dashboard"
-            onClick={() => setIsOpen(false)}
-            className={`flex items-center gap-3 p-2 rounded-lg ${activeClass("/dashboard")}`}
-          >
-            <LayoutDashboard size={20} />
-            Dashboard
-          </Link>
+            <Link
+              to="/dashboard"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/dashboard")}`}
+            >
+              <LayoutDashboard size={18} />
+              Dashboard
+            </Link>
 
-          <Link
-            to="/transactions"
-            onClick={() => setIsOpen(false)}
-            className={`flex items-center gap-3 p-2 rounded-lg ${activeClass("/transactions")}`}
-          >
-            <Wallet size={20} />
-            Transactions
-          </Link>
+            <Link
+              to="/transactions"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/transactions")}`}
+            >
+              <Wallet size={18} />
+              Transactions
+            </Link>
 
-          <Link
-            to="/budgets"
-            onClick={() => setIsOpen(false)}
-            className={`flex items-center gap-3 p-2 rounded-lg ${activeClass("/budgets")}`}
-          >
-            <PiggyBank size={20} />
-            Budgets
-          </Link>
+            <Link
+              to="/budgets"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/budgets")}`}
+            >
+              <PiggyBank size={18} />
+              Budgets
+            </Link>
 
-          <Link
-            to="/goals"
-            onClick={() => setIsOpen(false)}
-            className={`flex items-center gap-3 p-2 rounded-lg ${activeClass("/goals")}`}
-          >
-            <Target size={20} />
-            Goals
-          </Link>
+            <Link
+              to="/goals"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/goals")}`}
+            >
+              <Target size={18} />
+              Goals
+            </Link>
 
-          <Link
-            to="/analytics"
-            onClick={() => setIsOpen(false)}
-            className={`flex items-center gap-3 p-2 rounded-lg ${activeClass("/analytics")}`}
-          >
-            <BarChart3 size={20} />
-            Analytics
-          </Link>
+            <Link
+              to="/analytics"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/analytics")}`}
+            >
+              <BarChart3 size={18} />
+              Analytics
+            </Link>
 
-          <Link
-            to="/recurring"
-            onClick={() => setIsOpen(false)}
-            className={`flex items-center gap-3 p-2 rounded-lg ${activeClass("/recurring")}`}
-          >
-            <Repeat size={20} />
-            Recurring
-          </Link>
+            <Link
+              to="/recurring"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/recurring")}`}
+            >
+              <Repeat size={18} />
+              Recurring
+            </Link>
 
-          <Link
-            to="/categories"
-            onClick={() => setIsOpen(false)}
-            className={`flex items-center gap-3 p-2 rounded-lg ${activeClass("/categories")}`}
-          >
-            <Tags size={20} />
-            Categories
-          </Link>
+            <Link
+              to="/categories"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/categories")}`}
+            >
+              <Tags size={18} />
+              Categories
+            </Link>
 
-         
-          <Link
-            to="/export-csv"
-            onClick={() => setIsOpen(false)}
-            className={`flex items-center gap-3 p-2 rounded-lg ${activeClass("/export-csv")}`}
-          >
-            <Download size={20} />
-            Export CSV
-          </Link>
+            <Link
+              to="/export-csv"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/export-csv")}`}
+            >
+              <Download size={18} />
+              Export CSV
+            </Link>
 
-          <Link
-            to="/export-pdf"
-            onClick={() => setIsOpen(false)}
-            className={`flex items-center gap-3 p-2 rounded-lg ${activeClass("/export-pdf")}`}
-          >
-            <Download size={20} />
-            Export PDF
-          </Link>
+            <Link
+              to="/export-pdf"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/export-pdf")}`}
+            >
+              <Download size={18} />
+              Export PDF
+            </Link>
 
-          <Link
-            to="/settings"
-            onClick={() => setIsOpen(false)}
-            className={`flex items-center gap-3 p-2 rounded-lg ${activeClass("/settings")}`}
-          >
-            <Settings size={20} />
-            Settings
-          </Link>
+            <Link
+              to="/settings"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/settings")}`}
+            >
+              <Settings size={18} />
+              Settings
+            </Link>
+
+          </nav>
         </div>
 
-        {/* Logout */}
-        <div className="p-4 border-t">
+        {/* Logout Section */}
+        <div className="p-6 border-t bg-gray-50">
           <Link
             to="/logout"
-            className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-red-500 hover:text-white"
+            className="flex items-center gap-3 px-4 py-2 rounded-lg
+              text-gray-600 font-medium
+              hover:bg-red-500 hover:text-white
+              transition duration-300"
           >
-            <LogOut size={20} />
+            <LogOut size={18} />
             Logout
           </Link>
         </div>

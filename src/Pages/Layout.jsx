@@ -16,7 +16,7 @@ const Layout = () => {
 
         <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
 
-        <main className="p-4 md:p-6 lg:p-8 lg:ml-64">
+        <main className="p-4 md:p-6 lg:p-8 lg:ml-68">
 
           <Outlet />
 
