@@ -33,8 +33,8 @@ function Budgets() {
 
   const loadTransactions = async () => {
     try {
-      const data = await getTransactions();
-      setTransactions(data);
+      const transactionsData = await getTransactions();
+      setTransactions(transactionsData.data);
     } catch (err) {
       console.log(err);
     }
@@ -42,7 +42,7 @@ function Budgets() {
 
   // Attach spent + status logic
   const budgetsWithTracking = budgets.map((budget) => {
-    const spent = transactions.data
+    const spent = transactions
       .filter(
         (t) =>
           t.type === "expense" &&
@@ -148,8 +148,16 @@ function Budgets() {
       {/* SUMMARY CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <SummaryCard title="Total Budget" value={totalBudget} />
-        <SummaryCard title="Total Spent" value={totalSpent} color="text-red-500" />
-        <SummaryCard title="Remaining" value={remaining} color="text-emerald-600" />
+        <SummaryCard
+          title="Total Spent"
+          value={totalSpent}
+          color="text-red-500"
+        />
+        <SummaryCard
+          title="Remaining"
+          value={remaining}
+          color="text-emerald-600"
+        />
       </div>
 
       {/* FORM + CHART */}
@@ -168,9 +176,17 @@ function Budgets() {
           >
             {({ isSubmitting }) => (
               <Form className="space-y-4">
-
-                <FormInput name="category" label="Category" placeholder="Food, Rent, Travel" />
-                <FormInput name="limitAmount" label="Amount" type="number" placeholder="5000" />
+                <FormInput
+                  name="category"
+                  label="Category"
+                  placeholder="Food, Rent, Travel"
+                />
+                <FormInput
+                  name="limitAmount"
+                  label="Amount"
+                  type="number"
+                  placeholder="5000"
+                />
 
                 <SelectField name="period" label="Period">
                   <option value="monthly">Monthly</option>
@@ -178,7 +194,12 @@ function Budgets() {
                 </SelectField>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <FormInput name="startDate" label="Start Date" type="date" full />
+                  <FormInput
+                    name="startDate"
+                    label="Start Date"
+                    type="date"
+                    full
+                  />
                   <FormInput name="endDate" label="End Date" type="date" full />
                 </div>
 
@@ -222,6 +243,8 @@ function Budgets() {
                 <th className="p-4 text-left">Spent</th>
                 <th className="p-4 text-left">Remaining</th>
                 <th className="p-4 text-left">Progress</th>
+                <th className="p-4 text-left">Start Date</th>
+                <th className="p-4 text-left">End Date</th>
                 <th className="p-4 text-left">Status</th>
                 <th className="p-4 text-center">Actions</th>
               </tr>
@@ -233,7 +256,9 @@ function Budgets() {
                   key={budget._id}
                   className="border-t hover:bg-gray-50 transition"
                 >
-                  <td className="p-4 font-medium text-gray-700">{budget.category}</td>
+                  <td className="p-4 font-medium text-gray-700">
+                    {budget.category}
+                  </td>
                   <td className="p-4">₹{budget.limitAmount}</td>
                   <td className="p-4 text-red-500">₹{budget.spent}</td>
                   <td className="p-4 text-emerald-600">₹{budget.remaining}</td>
@@ -242,11 +267,15 @@ function Budgets() {
                     <div className="w-full bg-gray-200 h-3 rounded-full">
                       <div
                         className={`${getStatusColor(budget.status)} h-3 rounded-full`}
-                        style={{ width: `${Math.min(budget.percentage, 100)}%` }}
+                        style={{
+                          width: `${Math.min(budget.percentage, 100)}%`,
+                        }}
                       ></div>
                     </div>
                   </td>
 
+                  <td className="p-4 ">{budget.startDate.slice(0, 10)}</td>
+                  <td className="p-4 ">{budget.endDate.slice(0, 10)}</td>
                   <td className="p-4">
                     <span
                       className={`px-3 py-1 text-white rounded-full text-sm ${getStatusColor(budget.status)}`}

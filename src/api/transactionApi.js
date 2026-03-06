@@ -1,32 +1,46 @@
 import axios from "axios";
 
-const token = localStorage.getItem("token");
-
 const api = axios.create({
-  baseURL: "http://localhost:5000/api/transactions",
+  baseURL: "http://localhost:5000/api",
   headers: {
-    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YTIzMjlkYWIzZjM5OGU2YTFjNTgwOCIsImlhdCI6MTc3MjUzNDg5MiwiZXhwIjoxNzcyNjIxMjkyfQ.MIGOAbshQX2DAag4ocPaMOtXPtfSaHS230CctctijdU`,
     "Content-Type": "application/json",
   },
 });
 
+// Attach token dynamically before every request
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// ---------------- TRANSACTION API ----------------
 
 export const getTransactions = async () => {
-  const res = await api.get("/");
+  const res = await api.get("/transactions");
   return res.data;
 };
 
 export const createTransaction = async (data) => {
-  const res = await api.post("/", data);
+  const res = await api.post("/transactions", data);
   return res.data;
 };
 
 export const updateTransaction = async (id, data) => {
-  const res = await api.put(`/${id}`, data);
+  const res = await api.put(`/transactions/${id}`, data);
   return res.data;
 };
 
 export const deleteTransaction = async (id) => {
-  const res = await api.delete(`/${id}`);
+  const res = await api.delete(`/transactions/${id}`);
   return res.data;
 };

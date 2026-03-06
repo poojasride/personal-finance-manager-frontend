@@ -39,6 +39,8 @@ function Signin() {
         values,
       );
 
+      localStorage.setItem("token", response.data.token);
+
       //Success message
       alert(response.data.message || "Signin successfull!");
 
@@ -49,17 +51,16 @@ function Signin() {
       navigate("/dashboard");
     } catch (error) {
       //Error message
-      alert(
-        error.response?.data?.error || "Signin failed. Please try again.",
-      );
-    } 
+      alert(error.response?.data?.error || "Signin failed. Please try again.");
+    }
   };
 
   return (
     <div className="max-w-4xl mx-auto p-8 m-18">
       {/* <Logo /> */}
       <h1 className="text-3xl font-bold text-center font-serif">
-        Welcome to <span className="text-green-800">Personal Finance Manager</span>
+        Welcome to{" "}
+        <span className="text-green-800">Personal Finance Manager</span>
       </h1>
       <p className="text-center mt-4 text-gray-600 text-lg font-semibold tracking-loose">
         Please sign in to manage your personal finances securely.
