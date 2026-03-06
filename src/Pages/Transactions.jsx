@@ -18,12 +18,12 @@ function Expense() {
   const [editingTransaction, setEditingTransaction] = useState(null);
 
   const [filters, setFilters] = useState({
+    title: "",
     type: "",
     category: "",
     startDate: "",
     endDate: "",
   });
-
   useEffect(() => {
     loadTransactions();
     loadCategories();
@@ -51,16 +51,22 @@ function Expense() {
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((t) => {
-      if (filters.type && t.type !== filters.type) return false;
       if (
-        filters.category &&
-        !t.category.toLowerCase().includes(filters.category.toLowerCase())
+        filters.title &&
+        !t.title.toLowerCase().includes(filters.title.toLowerCase())
       )
         return false;
+
+      if (filters.type && t.type !== filters.type) return false;
+
+      if (filters.category && t.category !== filters.category) return false;
+
       if (filters.startDate && new Date(t.date) < new Date(filters.startDate))
         return false;
+
       if (filters.endDate && new Date(t.date) > new Date(filters.endDate))
         return false;
+
       return true;
     });
   }, [transactions, filters]);
@@ -261,6 +267,108 @@ function Expense() {
             <ExpenseChart transactions={transactions} />
           </div>
         </div>
+
+        {/* FILTER PANEL */}
+
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8">
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">
+            Filter Transactions
+          </h3>
+
+          <div className="grid gap-4 md:grid-cols-5">
+            {/* TITLE SEARCH */}
+
+            <input
+              type="text"
+              placeholder="Search Title..."
+              value={filters.title}
+              onChange={(e) =>
+                setFilters({ ...filters, title: e.target.value })
+              }
+              className="px-4 py-2 border rounded-xl
+      focus:ring-2 focus:ring-emerald-400 outline-none"
+            />
+
+            {/* TYPE FILTER */}
+
+            <select
+              value={filters.type}
+              onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+              className="px-4 py-2 border rounded-xl
+      focus:ring-2 focus:ring-emerald-400 outline-none"
+            >
+              <option value="">All Types</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+
+            {/* CATEGORY FILTER */}
+
+            <select
+              value={filters.category}
+              onChange={(e) =>
+                setFilters({ ...filters, category: e.target.value })
+              }
+              className="px-4 py-2 border rounded-xl
+      focus:ring-2 focus:ring-emerald-400 outline-none"
+            >
+              <option value="">All Categories</option>
+
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+
+            {/* START DATE */}
+
+            <input
+              type="date"
+              value={filters.startDate}
+              onChange={(e) =>
+                setFilters({ ...filters, startDate: e.target.value })
+              }
+              className="px-4 py-2 border rounded-xl
+      focus:ring-2 focus:ring-emerald-400 outline-none"
+            />
+
+            {/* END DATE */}
+
+            <input
+              type="date"
+              value={filters.endDate}
+              onChange={(e) =>
+                setFilters({ ...filters, endDate: e.target.value })
+              }
+              className="px-4 py-2 border rounded-xl
+      focus:ring-2 focus:ring-emerald-400 outline-none"
+            />
+          </div>
+
+          {/* CLEAR FILTER */}
+
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={() =>
+                setFilters({
+                  title: "",
+                  type: "",
+                  category: "",
+                  startDate: "",
+                  endDate: "",
+                })
+              }
+              className="px-4 py-2 text-sm
+      bg-gray-100 hover:bg-gray-200
+      rounded-xl"
+            >
+              Clear Filters
+            </button>
+          </div>
+        </div>
+
+       
 
         {/* TABLE */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
