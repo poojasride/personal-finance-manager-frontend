@@ -7,12 +7,14 @@ import {
 } from "../api/transactionApi";
 import ExpenseChart from "../components/ExpenseDonutChart";
 import { Trash2, Pencil } from "lucide-react";
+import { getCategories } from "../api/categoryApi";
 
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
 function Expense() {
   const [transactions, setTransactions] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [editingTransaction, setEditingTransaction] = useState(null);
 
   const [filters, setFilters] = useState({
@@ -24,6 +26,7 @@ function Expense() {
 
   useEffect(() => {
     loadTransactions();
+    loadCategories();
   }, []);
 
   const loadTransactions = async () => {
@@ -32,6 +35,17 @@ function Expense() {
       setTransactions(res.data);
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const res = await getCategories();
+      setCategories(res.data); // axios response data
+
+      console.log("categories:", res.data);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -86,9 +100,7 @@ function Expense() {
       const formattedData = {
         ...values,
         amount: Number(values.amount),
-        recurringInterval: values.isRecurring
-          ? values.recurringInterval
-          : null,
+        recurringInterval: values.isRecurring ? values.recurringInterval : null,
       };
 
       if (editingTransaction) {
@@ -117,7 +129,6 @@ function Expense() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 py-8">
-
         {/* HEADER */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
@@ -140,16 +151,11 @@ function Expense() {
             value={totalExpense}
             color="text-red-500"
           />
-          <SummaryCard
-            title="Balance"
-            value={balance}
-            color="text-blue-600"
-          />
+          <SummaryCard title="Balance" value={balance} color="text-blue-600" />
         </div>
 
         {/* FORM + CHART */}
         <div className="grid gap-8 lg:grid-cols-2 mb-8">
-
           {/* FORM CARD */}
           <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-gray-100">
             <h3 className="text-lg font-semibold text-gray-700 mb-6">
@@ -171,7 +177,6 @@ function Expense() {
             >
               {({ values, isSubmitting }) => (
                 <Form className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
                   <FormInput name="title" label="Title" full />
                   <FormInput name="description" label="Description" full />
                   <FormInput name="amount" label="Amount" type="number" />
@@ -181,7 +186,22 @@ function Expense() {
                     <option value="income">Income</option>
                   </SelectField>
 
-                  <FormInput name="category" label="Category" />
+                  <SelectField name="category" label="Category">
+                    <option value="">Select Category</option>
+
+                    {categories
+                      ?.filter(
+                        (cat) =>
+                          cat.type?.toLowerCase() ===
+                          values.type?.toLowerCase(),
+                      )
+                      .map((cat) => (
+                        <option key={cat._id} value={cat.name}>
+                          {cat.name}
+                        </option>
+                      ))}
+                  </SelectField>
+
                   <FormInput name="date" label="Date" type="date" />
 
                   <div className="flex items-center gap-3 sm:col-span-2">
@@ -224,11 +244,10 @@ function Expense() {
                           ? "Updating..."
                           : "Adding..."
                         : editingTransaction
-                        ? "Update Transaction"
-                        : "Add Transaction"}
+                          ? "Update Transaction"
+                          : "Add Transaction"}
                     </button>
                   </div>
-
                 </Form>
               )}
             </Formik>
@@ -241,7 +260,6 @@ function Expense() {
             </h3>
             <ExpenseChart transactions={transactions} />
           </div>
-
         </div>
 
         {/* TABLE */}
@@ -272,9 +290,7 @@ function Expense() {
                     key={t._id}
                     className="border-t hover:bg-gray-50 transition"
                   >
-                    <td className="p-4 font-medium text-gray-700">
-                      {t.title}
-                    </td>
+                    <td className="p-4 font-medium text-gray-700">{t.title}</td>
                     <td className="p-4">{t.category}</td>
 
                     <td className="p-4">
@@ -290,18 +306,12 @@ function Expense() {
                       </span>
                     </td>
 
-                    <td className="p-4 font-semibold">
-                      ₹{t.amount}
-                    </td>
+                    <td className="p-4 font-semibold">₹{t.amount}</td>
+
+                    <td className="p-4">{t.date?.slice(0, 10)}</td>
 
                     <td className="p-4">
-                      {t.date?.slice(0, 10)}
-                    </td>
-
-                    <td className="p-4">
-                      {t.isRecurring
-                        ? `Yes (${t.recurringInterval})`
-                        : "No"}
+                      {t.isRecurring ? `Yes (${t.recurringInterval})` : "No"}
                     </td>
 
                     <td className="p-4 flex justify-center gap-4">
@@ -331,7 +341,6 @@ function Expense() {
             )}
           </div>
         </div>
-
       </div>
     </div>
   );
@@ -345,9 +354,7 @@ function SummaryCard({ title, value, color }) {
   return (
     <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100 hover:shadow-xl transition duration-300">
       <p className="text-sm text-gray-500">{title}</p>
-      <h2 className={`text-3xl font-bold mt-2 ${color}`}>
-        ₹{value}
-      </h2>
+      <h2 className={`text-3xl font-bold mt-2 ${color}`}>₹{value}</h2>
     </div>
   );
 }
@@ -355,9 +362,7 @@ function SummaryCard({ title, value, color }) {
 function FormInput({ name, label, type = "text", full }) {
   return (
     <div className={full ? "sm:col-span-2" : ""}>
-      <label className="text-sm font-medium text-gray-600">
-        {label}
-      </label>
+      <label className="text-sm font-medium text-gray-600">{label}</label>
       <Field
         name={name}
         type={type}
@@ -378,9 +383,7 @@ function FormInput({ name, label, type = "text", full }) {
 function SelectField({ name, label, children, full }) {
   return (
     <div className={full ? "sm:col-span-2" : ""}>
-      <label className="text-sm font-medium text-gray-600">
-        {label}
-      </label>
+      <label className="text-sm font-medium text-gray-600">{label}</label>
       <Field
         as="select"
         name={name}

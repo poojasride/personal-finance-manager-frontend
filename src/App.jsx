@@ -7,16 +7,14 @@ import { Routes, Route, Link } from "react-router-dom";
 import WelcomeBlog from "./Pages/Welcome";
 import SuccessReset from "./Pages/SuccessReset";
 import Dashboard from "./Pages/Dashboard";
-import Header from "./components/Header";
-import Sidebar from "./components/Sidebar";
 import Budgets from "./Pages/Budgets";
 import Transactions from "./Pages/Transactions";
 import Goals from "./Pages/Goals";
 import Analytics from "./Pages/Analytics";
-
 import Recurring from "./Pages/Recurring";
 import Categories from "./Pages/Categories";
-import Export from "./Pages/Export";
+import ExportCsv from "./Pages/ExportCsv";
+import ExportPdf from "./Pages/ExportPdf";
 import Settings from "./Pages/Settings";
 import Logout from "./Pages/Logout";
 import Layout from "./Pages/Layout";
@@ -52,6 +50,8 @@ function App() {
 
           <Route path="/recurring" element={<Recurring />} />
           <Route path="/categories" element={<Categories />} />
+          <Route path="/export-csv" element={<ExportCsv />} />
+          <Route path="/export-pdf" element={<ExportPdf />} />
 
           <Route path="/settings" element={<Settings />} />
 
