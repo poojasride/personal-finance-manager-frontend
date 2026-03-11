@@ -8,6 +8,7 @@ import {
 import { getTransactions } from "../api/transactionApi";
 import BudgetDonutChart from "../components/BudgetDonutChart";
 import { Trash2, Pencil } from "lucide-react";
+import { getCategories } from "../api/categoryApi";
 
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -16,10 +17,12 @@ function Budgets() {
   const [budgets, setBudgets] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [editingBudget, setEditingBudget] = useState(null);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     loadBudgets();
     loadTransactions();
+    loadCategories();
   }, []);
 
   const loadBudgets = async () => {
@@ -37,6 +40,17 @@ function Budgets() {
       setTransactions(transactionsData.data);
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const res = await getCategories();
+      setCategories(res.data); // axios response data
+
+      console.log("categories:", res.data);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -174,13 +188,18 @@ function Budgets() {
             validationSchema={validationSchema}
             onSubmit={onSubmit}
           >
-            {({ isSubmitting }) => (
+            {({ values, isSubmitting }) => (
               <Form className="space-y-4">
-                <FormInput
-                  name="category"
-                  label="Category"
-                  placeholder="Food, Rent, Travel"
-                />
+                <SelectField name="category" label="Category">
+                  <option value="">Select Category</option>
+
+                  {categories.map((cat) => (
+                    <option key={cat._id} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </SelectField>
+
                 <FormInput
                   name="limitAmount"
                   label="Amount"

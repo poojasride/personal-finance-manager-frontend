@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Wallet,
   TrendingDown,
@@ -8,195 +8,291 @@ import {
 } from "lucide-react";
 
 import MonthlyChart from "../components/MonthlyChart";
+import { getTransactions } from "../api/transactionApi";
 
 function Dashboard() {
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const monthlyBudget = 30000;
+
+  useEffect(() => {
+    loadTransactions();
+  }, []);
+
+  const loadTransactions = async () => {
+    try {
+      const res = await getTransactions();
+      setTransactions(res.data);
+    } catch (error) {
+      console.error("Error loading transactions", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const income = transactions
+    .filter((t) => t.type === "income")
+    .reduce((acc, curr) => acc + curr.amount, 0);
+
+  const expenses = transactions
+    .filter((t) => t.type === "expense")
+    .reduce((acc, curr) => acc + curr.amount, 0);
+
+  const totalBalance = income - expenses;
+
+  const budgetPercent = Math.min((expenses / monthlyBudget) * 100, 100).toFixed(
+    0
+  );
+
+  const recentTransactions = [...transactions]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 5);
+
+  if (loading) {
+    return <div className="p-8 text-gray-500">Loading dashboard...</div>;
+  }
+
   return (
-    <div className="p-4 lg:p-6 bg-gray-50 min-h-screen  ">
+    <div className="min-h-screen bg-gray-50 p-8">
+
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-xl lg:text-2xl font-semibold">
-          Hi, Welcome Back 👋
-        </h1>
-        <p className="text-gray-500 text-sm">
-          Here's an overview of your finances
-        </p>
-      </div>
 
-      {/* Top Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {/* Card 1 */}
-        <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
-          <div className="bg-emerald-100 p-3 rounded-lg">
-            <Wallet className="text-emerald-600" />
-          </div>
-          <div>
-            <p className="text-gray-500 text-sm">Total Balance</p>
-            <h2 className="text-lg font-semibold">₹ 82,000</h2>
-          </div>
+      <div className="flex items-center justify-between mb-10">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800">
+            Finance Dashboard
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">
+            Manage and track your financial activity
+          </p>
         </div>
 
-        {/* Card 2 */}
-        <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
-          <div className="bg-orange-100 p-3 rounded-lg">
-            <TrendingDown className="text-orange-600" />
-          </div>
-          <div>
-            <p className="text-gray-500 text-sm">This Month Expenses</p>
-            <h2 className="text-lg font-semibold">₹ 18,000</h2>
-          </div>
-        </div>
-
-        {/* Card 3 */}
-        <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
-          <div className="bg-green-100 p-3 rounded-lg">
-            <TrendingUp className="text-green-600" />
-          </div>
-          <div>
-            <p className="text-gray-500 text-sm">Income</p>
-            <h2 className="text-lg font-semibold">₹ 25,000</h2>
-          </div>
-        </div>
-
-        {/* Card 4 */}
-        <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
-          <div className="bg-blue-100 p-3 rounded-lg">
-            <PiggyBank className="text-blue-600" />
-          </div>
-          <div>
-            <p className="text-gray-500 text-sm">Remaining Budget</p>
-            <h2 className="text-lg font-semibold">₹ 30,000</h2>
-          </div>
+        <div className="bg-white border px-5 py-2 rounded-xl shadow-sm text-sm text-gray-600">
+          {new Date().toDateString()}
         </div>
       </div>
 
-      {/* Middle Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        {/* LEFT SIDE */}
-        <div className="lg:col-span-1 flex flex-col gap-6">
-          {/* Budget Progress */}
-          <div className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl p-5">
-            <div className="flex items-center gap-4 mb-3">
-              <Target size={32} />
-              <div>
-                <h3 className="font-semibold">
-                  37% of Your Monthly Budget Spent
-                </h3>
-                <p className="text-sm opacity-90">Keep It Up!</p>
-              </div>
+      {/* Stats */}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
+
+        {/* Balance */}
+
+        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl p-6 shadow-lg hover:scale-[1.02] transition">
+
+          <div className="flex justify-between items-center">
+
+            <div>
+              <p className="text-sm opacity-90">Total Balance</p>
+              <h2 className="text-2xl font-bold mt-1">
+                ₹ {totalBalance.toLocaleString()}
+              </h2>
             </div>
 
-            {/* Progress Bar */}
-            <div className="w-full bg-white/30 rounded-full h-3 mt-3">
-              <div className="bg-yellow-300 h-3 rounded-full w-[37%]"></div>
+            <div className="bg-white/20 p-3 rounded-lg">
+              <Wallet size={22} />
             </div>
 
-            <div className="flex justify-between text-sm mt-2">
-              <span>₹18,000 spent</span>
-              <span>₹30,000 budget</span>
-            </div>
           </div>
 
-          {/* Income Trend */}
-          <div className="bg-white rounded-xl shadow-sm p-5">
-            <h3 className="font-semibold mb-3">Income Trend</h3>
+        </div>
 
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Salary</span>
-                <span className="font-semibold">₹11,500</span>
-              </div>
+        {/* Expenses */}
 
-              <div className="flex justify-between">
-                <span className="text-gray-500">Dividends</span>
-                <span className="font-semibold">₹7,000</span>
-              </div>
+        <div className="bg-white rounded-2xl p-6 border shadow-sm hover:shadow-md transition">
 
-              <div className="flex justify-between">
-                <span className="text-gray-500">Other</span>
-                <span className="font-semibold">₹6,500</span>
-              </div>
+          <div className="flex justify-between items-center">
+
+            <div>
+              <p className="text-gray-500 text-sm">Expenses</p>
+              <h2 className="text-xl font-semibold text-gray-800 mt-1">
+                ₹ {expenses.toLocaleString()}
+              </h2>
             </div>
+
+            <div className="bg-red-100 p-3 rounded-lg">
+              <TrendingDown className="text-red-500" size={20} />
+            </div>
+
           </div>
+
         </div>
 
-        {/* RIGHT SIDE */}
-        <div className="lg:col-span-2">
-          <MonthlyChart />
+        {/* Income */}
+
+        <div className="bg-white rounded-2xl p-6 border shadow-sm hover:shadow-md transition">
+
+          <div className="flex justify-between items-center">
+
+            <div>
+              <p className="text-gray-500 text-sm">Income</p>
+              <h2 className="text-xl font-semibold text-gray-800 mt-1">
+                ₹ {income.toLocaleString()}
+              </h2>
+            </div>
+
+            <div className="bg-green-100 p-3 rounded-lg">
+              <TrendingUp className="text-green-500" size={20} />
+            </div>
+
+          </div>
+
         </div>
+
+        {/* Remaining */}
+
+        <div className="bg-white rounded-2xl p-6 border shadow-sm hover:shadow-md transition">
+
+          <div className="flex justify-between items-center">
+
+            <div>
+              <p className="text-gray-500 text-sm">Remaining Budget</p>
+              <h2 className="text-xl font-semibold text-gray-800 mt-1">
+                ₹ {(monthlyBudget - expenses).toLocaleString()}
+              </h2>
+            </div>
+
+            <div className="bg-blue-100 p-3 rounded-lg">
+              <PiggyBank className="text-blue-500" size={20} />
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
 
-      {/* Bottom Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-        {/* Recent Transactions */}
-        <div className="bg-white rounded-xl shadow-sm p-5 col-span-2">
-          <h3 className="font-semibold mb-4">Recent Transactions</h3>
+      {/* Chart + Budget */}
 
-          <table className="w-full">
-            <thead>
-              <tr className="text-left text-gray-500 text-sm">
-                <th className="pb-2">Category</th>
-                <th className="pb-2">Date</th>
-                <th className="pb-2 text-right">Amount</th>
-              </tr>
-            </thead>
+      <div className="grid lg:grid-cols-2 gap-8 mb-10">
 
-            <tbody className="text-sm">
-              <tr className="border-t">
-                <td className="py-2">Groceries</td>
-                <td>Apr 23</td>
-                <td className="text-right text-emerald-600">₹10,000</td>
-              </tr>
+        {/* Chart */}
 
-              <tr className="border-t">
-                <td className="py-2">Internet</td>
-                <td>Apr 22</td>
-                <td className="text-right text-emerald-600">₹1,000</td>
-              </tr>
+        <div className="bg-white p-6 rounded-2xl border shadow-sm">
 
-              <tr className="border-t">
-                <td className="py-2">Electricity</td>
-                <td>Apr 16</td>
-                <td className="text-right text-emerald-600">₹3,500</td>
-              </tr>
+          <h3 className="font-semibold text-gray-700 mb-5">
+            Monthly Overview
+          </h3>
 
-              <tr className="border-t">
-                <td className="py-2">Rent</td>
-                <td>May 1</td>
-                <td className="text-right text-emerald-600">₹15,000</td>
-              </tr>
-            </tbody>
-          </table>
+          <MonthlyChart transactions={transactions} />
+
         </div>
 
-        {/* Financial Goals */}
-        <div className="bg-white rounded-xl shadow-sm p-5">
-          <h3 className="font-semibold mb-4">Financial Goals</h3>
+        {/* Budget Card */}
 
-          {/* Goal */}
-          <div className="mb-4">
-            <div className="flex justify-between text-sm">
-              <span>Laptop</span>
-              <span>₹50,000</span>
+        <div className="bg-white p-6 rounded-2xl border shadow-sm flex flex-col justify-between">
+
+          <div className="flex justify-between items-center mb-5">
+
+            <div className="flex items-center gap-2">
+              <Target className="text-emerald-500" size={20} />
+              <h3 className="font-semibold text-gray-700">Monthly Budget</h3>
             </div>
 
-            <div className="w-full bg-gray-200 h-2 rounded mt-1">
-              <div className="bg-emerald-500 h-2 rounded w-[40%]"></div>
-            </div>
+            <span className="text-xs bg-gray-100 px-3 py-1 rounded-full">
+              {budgetPercent}% used
+            </span>
+
           </div>
 
-          {/* Goal */}
-          <div className="mb-4">
-            <div className="flex justify-between text-sm">
-              <span>Vacation</span>
-              <span>₹35,000</span>
+          <div className="grid grid-cols-3 text-center mb-5">
+
+            <div>
+              <p className="text-xs text-gray-500">Spent</p>
+              <p className="text-red-500 font-semibold">
+                ₹ {expenses.toLocaleString()}
+              </p>
             </div>
 
-            <div className="w-full bg-gray-200 h-2 rounded mt-1">
-              <div className="bg-emerald-500 h-2 rounded w-[40%]"></div>
+            <div>
+              <p className="text-xs text-gray-500">Budget</p>
+              <p className="font-semibold">
+                ₹ {monthlyBudget.toLocaleString()}
+              </p>
             </div>
+
+            <div>
+              <p className="text-xs text-gray-500">Remaining</p>
+              <p className="text-emerald-600 font-semibold">
+                ₹ {(monthlyBudget - expenses).toLocaleString()}
+              </p>
+            </div>
+
           </div>
+
+          <div className="w-full bg-gray-200 rounded-full h-3">
+
+            <div
+              className={`h-3 rounded-full ${
+                budgetPercent > 80
+                  ? "bg-red-500"
+                  : budgetPercent > 50
+                  ? "bg-yellow-400"
+                  : "bg-emerald-500"
+              }`}
+              style={{ width: `${budgetPercent}%` }}
+            />
+
+          </div>
+
         </div>
+
       </div>
+
+      {/* Transactions */}
+
+      <div className="bg-white rounded-2xl border shadow-sm p-6">
+
+        <h3 className="font-semibold text-gray-700 mb-6">
+          Recent Transactions
+        </h3>
+
+        <table className="w-full text-sm">
+
+          <thead>
+
+            <tr className="text-gray-500 border-b">
+
+              <th className="text-left py-3">Category</th>
+              <th className="text-left">Date</th>
+              <th className="text-right">Amount</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            {recentTransactions.map((t) => (
+              <tr
+                key={t._id}
+                className="border-b hover:bg-gray-50 transition"
+              >
+
+                <td className="py-3">{t.category}</td>
+
+                <td>{new Date(t.date).toLocaleDateString()}</td>
+
+                <td
+                  className={`text-right font-semibold ${
+                    t.type === "income"
+                      ? "text-green-600"
+                      : "text-red-500"
+                  }`}
+                >
+                  ₹ {t.amount}
+                </td>
+
+              </tr>
+            ))}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
     </div>
   );
 }
