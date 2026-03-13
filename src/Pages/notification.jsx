@@ -1,64 +1,74 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Bell, CheckCircle } from "lucide-react";
 
+import {
+  getNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+} from "../api/notificationApi";
+
 const Notifications = () => {
+
   const [notifications, setNotifications] = useState([]);
   const [filter, setFilter] = useState("all");
 
-  const token = localStorage.getItem("token");
 
-  const api = axios.create({
-    baseURL: "http://localhost:5000/api",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
 
   const loadNotifications = async () => {
     try {
-      const res = await api.get("/notifications");
-      setNotifications(res.data);
+      const data = await getNotifications();
+      setNotifications(data);
     } catch (err) {
       console.error(err);
     }
   };
 
+
+
   const markRead = async (id) => {
     try {
-      await api.put(`/notifications/${id}`);
+
+      await markNotificationRead(id);
 
       setNotifications((prev) =>
         prev.map((n) =>
           n._id === id ? { ...n, read: true } : n
         )
       );
+
     } catch (err) {
       console.error(err);
     }
   };
 
+
+
   const markAllRead = async () => {
     try {
+
       const unread = notifications.filter((n) => !n.read);
 
-      await Promise.all(
-        unread.map((n) =>
-          api.put(`/notifications/${n._id}`)
-        )
-      );
+      const ids = unread.map((n) => n._id);
+
+      await markAllNotificationsRead(ids);
 
       setNotifications((prev) =>
         prev.map((n) => ({ ...n, read: true }))
       );
+
     } catch (err) {
       console.error(err);
     }
   };
 
+
+
   useEffect(() => {
     loadNotifications();
   }, []);
+
+
+
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -99,7 +109,9 @@ const Notifications = () => {
         )}
       </div>
 
-      {/* FILTER TABS */}
+
+
+      {/* FILTER */}
       <div className="flex gap-3 mb-6">
 
         <button
@@ -126,7 +138,9 @@ const Notifications = () => {
 
       </div>
 
-      {/* NOTIFICATION LIST */}
+
+
+      {/* LIST */}
       <div className="space-y-4">
 
         {filteredNotifications.length === 0 ? (
@@ -149,12 +163,10 @@ const Notifications = () => {
               ${!n.read ? "border-emerald-300 bg-emerald-50" : ""}`}
             >
 
-              {/* ICON */}
               <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
                 <Bell size={16} className="text-emerald-600" />
               </div>
 
-              {/* CONTENT */}
               <div className="flex-1">
 
                 <div className="flex items-center justify-between">
