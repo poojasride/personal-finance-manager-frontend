@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const API_URL = "http://localhost:5000/api";
+
 const API = axios.create({
-  baseURL: "http://localhost:5000/api/auth",
+  baseURL: `${API_URL}`,
 });
 
 API.interceptors.request.use((config) => {
@@ -16,8 +18,6 @@ API.interceptors.request.use((config) => {
 
 export const getProfile = () => API.get("/profile");
 
-export const updateProfile = (data) =>
-  API.put("/profile", data);
+export const updateProfile = (data) => API.put("/profile", data);
 
-export const changePassword = (data) =>
-  API.put("/change-password", data);
+export const changePassword = (data) => API.put("/change-password", data);

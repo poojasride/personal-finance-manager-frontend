@@ -1,9 +1,11 @@
 import axios from "axios";
 
+const API_URL = "http://localhost:5000/api";
+
 export const downloadCSV = async (from, to) => {
 
   const response = await axios.get(
-    `http://localhost:5000/api/export/csv?from=${from}&to=${to}`,
+    `${API_URL}/export/csv?from=${from}&to=${to}`,
     {
       responseType: "blob",
       headers: {
@@ -18,7 +20,7 @@ export const downloadCSV = async (from, to) => {
 export const downloadPDF = async (from, to) => {
 
   const response = await axios.get(
-    `http://localhost:5000/api/export/pdf?from=${from}&to=${to}`,
+    `${API_URL}/export/pdf?from=${from}&to=${to}`,
     {
       responseType: "blob",
       headers: {
