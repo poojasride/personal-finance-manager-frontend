@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { User, Lock, Bell, Moon, Save } from "lucide-react";
-
 import { getProfile, updateProfile, changePassword } from "../api/userApi";
 
 function Settings() {
+
+  const [activeTab, setActiveTab] = useState("profile");
 
   const [user, setUser] = useState({
     name: "",
@@ -20,236 +21,357 @@ function Settings() {
     darkMode: false,
   });
 
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [loadingProfile, setLoadingProfile] = useState(false);
+  const [loadingPassword, setLoadingPassword] = useState(false);
 
+  const [alert, setAlert] = useState({
+    type: "",
+    message: "",
+  });
+
+  // =============================
+  // Load profile
+  // =============================
   useEffect(() => {
     loadProfile();
+    loadPreferences();
   }, []);
 
   const loadProfile = async () => {
     try {
       const res = await getProfile();
-      setUser(res.data);
+
+      setUser({
+        name: res.data.name || "",
+        email: res.data.email || "",
+      });
+
     } catch (error) {
-      console.error("Profile load error", error);
+      showAlert("error", "Failed to load profile");
     }
   };
+
+  // =============================
+  // Preferences Logic
+  // =============================
+
+  const loadPreferences = () => {
+    const saved = localStorage.getItem("preferences");
+
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setPreferences(parsed);
+
+      if (parsed.darkMode) {
+        document.documentElement.classList.add("dark");
+      }
+    }
+  };
+
+  const savePreferences = (newPrefs) => {
+    setPreferences(newPrefs);
+    localStorage.setItem("preferences", JSON.stringify(newPrefs));
+
+    // dark mode logic
+    if (newPrefs.darkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+
+    showAlert("success", "Preferences updated");
+  };
+
+  // =============================
+  // Alert system
+  // =============================
+
+  const showAlert = (type, message) => {
+    setAlert({ type, message });
+
+    setTimeout(() => {
+      setAlert({ type: "", message: "" });
+    }, 3000);
+  };
+
+  // =============================
+  // Profile Update
+  // =============================
 
   const handleProfileUpdate = async () => {
+
+    if (!user.name || !user.email) {
+      return showAlert("error", "Name and Email required");
+    }
+
     try {
-      setLoading(true);
+      setLoadingProfile(true);
+
       await updateProfile(user);
-      setMessage("Profile updated successfully");
+
+      showAlert("success", "Profile updated successfully");
+
     } catch (error) {
-      console.error(error);
+      showAlert("error", "Profile update failed");
     } finally {
-      setLoading(false);
+      setLoadingProfile(false);
     }
   };
 
+  // =============================
+  // Password Change
+  // =============================
+
   const handlePasswordChange = async () => {
+
+    if (!password.current || !password.newPassword) {
+      return showAlert("error", "Please fill all fields");
+    }
+
+    if (password.newPassword.length < 6) {
+      return showAlert("error", "Password must be at least 6 characters");
+    }
+
     try {
-      setLoading(true);
+      setLoadingPassword(true);
+
       await changePassword(password);
-      setPassword({ current: "", newPassword: "" });
-      setMessage("Password updated successfully");
+
+      setPassword({
+        current: "",
+        newPassword: "",
+      });
+
+      showAlert("success", "Password changed successfully");
+
     } catch (error) {
-      console.error(error);
+      showAlert("error", "Password change failed");
     } finally {
-      setLoading(false);
+      setLoadingPassword(false);
     }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-6xl mx-auto p-6">
 
       {/* Header */}
-
-      <div>
-        <h1 className="text-2xl font-bold text-gray-800">
-          Settings
-        </h1>
-
-        <p className="text-gray-500">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold">Settings</h1>
+        <p className="text-gray-500 text-sm">
           Manage your account and preferences
         </p>
       </div>
 
-      {message && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 p-3 rounded-lg">
-          {message}
+      {/* Alert */}
+      {alert.message && (
+        <div
+          className={`mb-6 px-4 py-3 rounded-lg border
+          ${
+            alert.type === "success"
+              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+              : "bg-red-50 text-red-700 border-red-200"
+          }`}
+        >
+          {alert.message}
         </div>
       )}
 
-      {/* Profile Card */}
+      <div className="grid md:grid-cols-4 gap-6">
 
-      <div className="bg-white rounded-2xl shadow-md border p-6">
+        {/* Sidebar */}
+        <div className="bg-white border rounded-xl p-4">
 
-        <div className="flex items-center gap-3 mb-6">
-          <User className="text-emerald-500" />
-          <h2 className="text-lg font-semibold">Profile</h2>
-        </div>
+          <button
+            onClick={() => setActiveTab("profile")}
+            className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg mb-2
+            ${activeTab === "profile"
+              ? "bg-emerald-50 text-emerald-600"
+              : "hover:bg-gray-100"}`}
+          >
+            <User size={16} />
+            Profile
+          </button>
 
-        <div className="grid md:grid-cols-2 gap-4">
-
-          <div>
-            <label className="text-sm text-gray-600">
-              Name
-            </label>
-
-            <input
-              type="text"
-              value={user.name}
-              onChange={(e) =>
-                setUser({ ...user, name: e.target.value })
-              }
-              className="w-full mt-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-400 outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600">
-              Email
-            </label>
-
-            <input
-              type="email"
-              value={user.email}
-              onChange={(e) =>
-                setUser({ ...user, email: e.target.value })
-              }
-              className="w-full mt-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-400 outline-none"
-            />
-          </div>
-
-        </div>
-
-        <button
-          onClick={handleProfileUpdate}
-          disabled={loading}
-          className="flex items-center gap-2 mt-5 bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600 disabled:opacity-50"
-        >
-          <Save size={16} />
-          {loading ? "Saving..." : "Save Changes"}
-        </button>
-
-      </div>
-
-      {/* Security Card */}
-
-      <div className="bg-white rounded-2xl shadow-md border p-6">
-
-        <div className="flex items-center gap-3 mb-6">
-          <Lock className="text-emerald-500" />
-          <h2 className="text-lg font-semibold">
+          <button
+            onClick={() => setActiveTab("security")}
+            className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg mb-2
+            ${activeTab === "security"
+              ? "bg-emerald-50 text-emerald-600"
+              : "hover:bg-gray-100"}`}
+          >
+            <Lock size={16} />
             Security
-          </h2>
-        </div>
+          </button>
 
-        <div className="grid md:grid-cols-2 gap-4">
-
-          <div>
-            <label className="text-sm text-gray-600">
-              Current Password
-            </label>
-
-            <input
-              type="password"
-              value={password.current}
-              onChange={(e) =>
-                setPassword({
-                  ...password,
-                  current: e.target.value,
-                })
-              }
-              className="w-full mt-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-400 outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-600">
-              New Password
-            </label>
-
-            <input
-              type="password"
-              value={password.newPassword}
-              onChange={(e) =>
-                setPassword({
-                  ...password,
-                  newPassword: e.target.value,
-                })
-              }
-              className="w-full mt-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-400 outline-none"
-            />
-          </div>
-
-        </div>
-
-        <button
-          onClick={handlePasswordChange}
-          disabled={loading}
-          className="mt-5 bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-black disabled:opacity-50"
-        >
-          {loading ? "Updating..." : "Change Password"}
-        </button>
-
-      </div>
-
-      {/* Preferences Card */}
-
-      <div className="bg-white rounded-2xl shadow-md border p-6">
-
-        <div className="flex items-center gap-3 mb-6">
-          <Bell className="text-emerald-500" />
-          <h2 className="text-lg font-semibold">
+          <button
+            onClick={() => setActiveTab("preferences")}
+            className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg
+            ${activeTab === "preferences"
+              ? "bg-emerald-50 text-emerald-600"
+              : "hover:bg-gray-100"}`}
+          >
+            <Bell size={16} />
             Preferences
-          </h2>
+          </button>
+
         </div>
 
-        <div className="space-y-4">
+        {/* Content */}
+        <div className="md:col-span-3 space-y-6">
 
-          <div className="flex items-center justify-between">
-            <span>Email Notifications</span>
+          {/* Profile */}
+          {activeTab === "profile" && (
+            <div className="bg-white border rounded-xl p-6">
 
-            <input
-              type="checkbox"
-              checked={preferences.emailNotifications}
-              onChange={() =>
-                setPreferences({
-                  ...preferences,
-                  emailNotifications:
-                    !preferences.emailNotifications,
-                })
-              }
-              className="w-5 h-5"
-            />
-          </div>
+              <h2 className="font-semibold text-lg mb-6">
+                Profile Information
+              </h2>
 
-          <div className="flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <Moon size={16} />
-              Dark Mode
-            </span>
+              <div className="grid md:grid-cols-2 gap-4">
 
-            <input
-              type="checkbox"
-              checked={preferences.darkMode}
-              onChange={() =>
-                setPreferences({
-                  ...preferences,
-                  darkMode: !preferences.darkMode,
-                })
-              }
-              className="w-5 h-5"
-            />
-          </div>
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={user.name}
+                  onChange={(e) =>
+                    setUser({ ...user, name: e.target.value })
+                  }
+                  className="border rounded-lg px-3 py-2"
+                />
+
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={user.email}
+                  onChange={(e) =>
+                    setUser({ ...user, email: e.target.value })
+                  }
+                  className="border rounded-lg px-3 py-2"
+                />
+
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={handleProfileUpdate}
+                  disabled={loadingProfile}
+                  className="flex items-center gap-2 bg-emerald-500 text-white px-4 py-2 rounded-lg"
+                >
+                  <Save size={16} />
+                  {loadingProfile ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+
+            </div>
+          )}
+
+          {/* Security */}
+          {activeTab === "security" && (
+            <div className="bg-white border rounded-xl p-6">
+
+              <h2 className="font-semibold text-lg mb-6">
+                Change Password
+              </h2>
+
+              <div className="grid md:grid-cols-2 gap-4">
+
+                <input
+                  type="password"
+                  placeholder="Current Password"
+                  value={password.current}
+                  onChange={(e) =>
+                    setPassword({
+                      ...password,
+                      current: e.target.value,
+                    })
+                  }
+                  className="border rounded-lg px-3 py-2"
+                />
+
+                <input
+                  type="password"
+                  placeholder="New Password"
+                  value={password.newPassword}
+                  onChange={(e) =>
+                    setPassword({
+                      ...password,
+                      newPassword: e.target.value,
+                    })
+                  }
+                  className="border rounded-lg px-3 py-2"
+                />
+
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={handlePasswordChange}
+                  disabled={loadingPassword}
+                  className="bg-gray-900 text-white px-4 py-2 rounded-lg"
+                >
+                  {loadingPassword ? "Updating..." : "Change Password"}
+                </button>
+              </div>
+
+            </div>
+          )}
+
+          {/* Preferences */}
+          {activeTab === "preferences" && (
+            <div className="bg-white border rounded-xl p-6">
+
+              <h2 className="font-semibold text-lg mb-6">
+                Preferences
+              </h2>
+
+              <div className="space-y-6">
+
+                <div className="flex justify-between items-center">
+
+                  <span>Email Notifications</span>
+
+                  <input
+                    type="checkbox"
+                    checked={preferences.emailNotifications}
+                    onChange={() =>
+                      savePreferences({
+                        ...preferences,
+                        emailNotifications:
+                          !preferences.emailNotifications,
+                      })
+                    }
+                  />
+
+                </div>
+
+                <div className="flex justify-between items-center">
+
+                  <span className="flex items-center gap-2">
+                    <Moon size={16} />
+                    Dark Mode
+                  </span>
+
+                  <input
+                    type="checkbox"
+                    checked={preferences.darkMode}
+                    onChange={() =>
+                      savePreferences({
+                        ...preferences,
+                        darkMode: !preferences.darkMode,
+                      })
+                    }
+                  />
+
+                </div>
+
+              </div>
+
+            </div>
+          )}
 
         </div>
 
       </div>
-
     </div>
   );
 }
