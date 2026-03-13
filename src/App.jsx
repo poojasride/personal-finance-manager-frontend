@@ -18,6 +18,7 @@ import ExportPdf from "./Pages/ExportPdf";
 import Settings from "./Pages/Settings";
 import Logout from "./Pages/Logout";
 import Layout from "./Pages/Layout";
+import Notifications from "./Pages/notification";
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
           <Route path="/categories" element={<Categories />} />
           <Route path="/export-csv" element={<ExportCsv />} />
           <Route path="/export-pdf" element={<ExportPdf />} />
+          <Route path="/notifications" element={<Notifications />} />
 
           <Route path="/settings" element={<Settings />} />
 
