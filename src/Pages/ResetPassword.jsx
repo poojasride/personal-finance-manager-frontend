@@ -42,7 +42,7 @@ function ResetPassword() {
 
       // API call
       const response = await axios.post(
-        `http://localhost:5000/api/auth/reset-password/${token}`, //  backend URL
+        `https://personal-finance-manager-backend-n06b.onrender.com/api/auth/reset-password/${token}`, //  backend URL
         values,
       );
 
