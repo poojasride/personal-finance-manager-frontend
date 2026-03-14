@@ -17,7 +17,7 @@ const Header = ({ onMenuClick }) => {
   // Axios instance (memoized)
   const api = useMemo(() => {
     return axios.create({
-      baseURL: "http://localhost:5000/api",
+      baseURL: "https://personal-finance-manager-backend-n06b.onrender.com/api",
       headers: {
         Authorization: `Bearer ${token}`,
       },
