@@ -9,6 +9,7 @@ import {
 
 import MonthlyChart from "../components/MonthlyChart";
 import { getTransactions } from "../api/transactionApi";
+import AIInsightCard from "../components/AIInsightCard";
 
 function Dashboard() {
   const [transactions, setTransactions] = useState([]);
@@ -144,6 +145,10 @@ function Dashboard() {
         </div>
       </div>
 
+      <div className="mb-10">
+        <AIInsightCard />
+      </div>
+
       {/* Chart + Budget */}
 
       <div className="grid lg:grid-cols-2 gap-8 mb-10">
@@ -242,11 +247,11 @@ function Dashboard() {
           </tbody>
         </table>
 
-           {recentTransactions.length === 0 && (
-              <div className="p-8 text-center text-gray-500">
-                No transactions found
-              </div>
-            )}
+        {recentTransactions.length === 0 && (
+          <div className="p-8 text-center text-gray-500">
+            No transactions found
+          </div>
+        )}
       </div>
     </div>
   );
