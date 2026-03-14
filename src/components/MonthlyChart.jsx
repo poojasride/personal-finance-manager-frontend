@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -9,44 +9,65 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-
-const data = [
-  {
-    name: "Jan",
-    income: 40000,
-    expense: 24000,
-  },
-  {
-    name: "Feb",
-    income: 30000,
-    expense: 13980,
-  },
-  {
-    name: "Mar",
-    income: 50000,
-    expense: 28000,
-  },
-  {
-    name: "Apr",
-    income: 47800,
-    expense: 39000,
-  },
-  {
-    name: "May",
-    income: 58900,
-    expense: 48000,
-  },
-  {
-    name: "Jun",
-    income: 63900,
-    expense: 38000,
-  },
-];
+import axios from "axios";
 
 function MonthlyChart() {
+
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+
+  const fetchTransactions = async () => {
+    try {
+
+      const res = await axios.get(
+        "https://personal-finance-manager-backend-n06b.onrender.com/api/transactions",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const transactions = res.data;
+
+      const monthlyData = {};
+
+      transactions.forEach((t) => {
+
+        const month = new Date(t.date).toLocaleString("default", {
+          month: "short",
+        });
+
+        if (!monthlyData[month]) {
+          monthlyData[month] = {
+            name: month,
+            income: 0,
+            expense: 0,
+          };
+        }
+
+        if (t.type === "income") {
+          monthlyData[month].income += t.amount;
+        } else {
+          monthlyData[month].expense += t.amount;
+        }
+      });
+
+      setData(Object.values(monthlyData));
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+
   return (
     <div className="bg-white p-5 rounded-xl shadow-sm h-[300px]">
-      
+
       <h3 className="font-semibold mb-4">Monthly Summary</h3>
 
       <ResponsiveContainer width="100%" height="90%">
