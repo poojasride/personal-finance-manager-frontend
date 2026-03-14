@@ -239,14 +239,14 @@ function Dashboard() {
                 </td>
               </tr>
             ))}
+          </tbody>
+        </table>
 
-            {recentTransactions.length === 0 && (
+           {recentTransactions.length === 0 && (
               <div className="p-8 text-center text-gray-500">
                 No transactions found
               </div>
             )}
-          </tbody>
-        </table>
       </div>
     </div>
   );
