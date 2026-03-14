@@ -322,6 +322,12 @@ function Budgets() {
               ))}
             </tbody>
           </table>
+
+             {budgetsWithTracking.length === 0 && (
+              <div className="p-8 text-center text-gray-500">
+                No budgets found
+              </div>
+            )}
         </div>
       </div>
     </div>

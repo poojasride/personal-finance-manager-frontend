@@ -228,7 +228,7 @@ const Header = ({ onMenuClick }) => {
               </div>
 
               <button
-                onClick={() => navigate("/profile")}
+                onClick={() => navigate("/settings")}
                 className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
               >
                 <User size={16} />

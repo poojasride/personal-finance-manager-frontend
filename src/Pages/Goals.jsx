@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  getGoals,
-  createGoal,
-  deleteGoal,
-  updateGoal,
-} from "../api/goalApi";
+import { getGoals, createGoal, deleteGoal, updateGoal } from "../api/goalApi";
 import GoalChart from "../components/GoalsDonutChart";
 import { Trash2, Pencil } from "lucide-react";
 
@@ -109,13 +104,13 @@ function Goals() {
   const totalGoals = goals.length;
   const totalTarget = goals.reduce((acc, goal) => acc + goal.targetAmount, 0);
   const totalSaved = goals.reduce((acc, goal) => acc + goal.savedAmount, 0);
-  const completedGoals = goals.filter((goal) => goal.status === "completed")
-    .length;
+  const completedGoals = goals.filter(
+    (goal) => goal.status === "completed",
+  ).length;
 
   return (
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden p-8">
       <div className="max-w-7xl mx-auto">
-
         {/* HEADER */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-teal-500 text-transparent bg-clip-text">
@@ -127,9 +122,21 @@ function Goals() {
         {/* SUMMARY CARDS */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
           <SummaryCard title="Total Goals" value={totalGoals} />
-          <SummaryCard title="Total Target" value={`₹${totalTarget}`} color="text-blue-600" />
-          <SummaryCard title="Total Saved" value={`₹${totalSaved}`} color="text-emerald-600" />
-          <SummaryCard title="Completed Goals" value={completedGoals} color="text-purple-600" />
+          <SummaryCard
+            title="Total Target"
+            value={`₹${totalTarget}`}
+            color="text-blue-600"
+          />
+          <SummaryCard
+            title="Total Saved"
+            value={`₹${totalSaved}`}
+            color="text-emerald-600"
+          />
+          <SummaryCard
+            title="Completed Goals"
+            value={completedGoals}
+            color="text-purple-600"
+          />
         </div>
 
         {/* FORM + CHART */}
@@ -149,8 +156,16 @@ function Goals() {
               {({ isSubmitting }) => (
                 <Form className="space-y-4">
                   <FormInput name="title" label="Goal Title" />
-                  <FormInput name="targetAmount" label="Target Amount" type="number" />
-                  <FormInput name="savedAmount" label="Saved Amount" type="number" />
+                  <FormInput
+                    name="targetAmount"
+                    label="Target Amount"
+                    type="number"
+                  />
+                  <FormInput
+                    name="savedAmount"
+                    label="Saved Amount"
+                    type="number"
+                  />
                   <FormInput name="category" label="Category" />
                   <FormInput name="deadline" label="Deadline" type="date" />
 
@@ -174,7 +189,9 @@ function Goals() {
 
           {/* CHART */}
           <div className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-gray-100">
-            <h3 className="font-semibold text-gray-700 mb-6">Goals Progress Overview</h3>
+            <h3 className="font-semibold text-gray-700 mb-6">
+              Goals Progress Overview
+            </h3>
             <GoalChart goals={goals} />
           </div>
         </div>
@@ -206,11 +223,16 @@ function Goals() {
                   : 0;
 
                 return (
-                  <tr key={goal._id} className="border-t hover:bg-gray-50 transition">
+                  <tr
+                    key={goal._id}
+                    className="border-t hover:bg-gray-50 transition"
+                  >
                     <td className="p-4 font-medium">{goal.title}</td>
                     <td className="p-4">{goal.category}</td>
                     <td className="p-4">₹{goal.targetAmount}</td>
-                    <td className="p-4 text-emerald-600">₹{goal.savedAmount}</td>
+                    <td className="p-4 text-emerald-600">
+                      ₹{goal.savedAmount}
+                    </td>
 
                     <td className="p-4 w-48">
                       <div className="w-full bg-gray-200 h-3 rounded-full">
@@ -219,7 +241,9 @@ function Goals() {
                           style={{ width: `${Math.min(percent, 100)}%` }}
                         />
                       </div>
-                      <span className="text-xs text-gray-500">{percent.toFixed(0)}%</span>
+                      <span className="text-xs text-gray-500">
+                        {percent.toFixed(0)}%
+                      </span>
                     </td>
 
                     <td className="p-4">{goal.deadline?.slice(0, 10)}</td>
@@ -256,8 +280,10 @@ function Goals() {
               })}
             </tbody>
           </table>
+          {goals.length === 0 && (
+            <div className="p-8 text-center text-gray-500">No goals found</div>
+          )}
         </div>
-
       </div>
     </div>
   );

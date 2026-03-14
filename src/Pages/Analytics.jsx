@@ -177,28 +177,18 @@ function Analytics() {
               </PieChart>
             </ResponsiveContainer>
           )}
-          {/* Center Text */}
-          <div className="text-center -mt-40 mb-16">
-            <p className="text-gray-400 text-sm">Total Expense</p>
-          </div>
 
-            {/* Legend */}
+          {/* Legend */}
           <div className="grid grid-cols-4 gap-3 text-sm mt-24">
             {expenseByCategory.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2"
-              >
+              <div key={index} className="flex items-center gap-2">
                 <div
                   className="w-3 h-3 rounded-full"
                   style={{
-                    backgroundColor:
-                      COLORS[index % COLORS.length],
+                    backgroundColor: COLORS[index % COLORS.length],
                   }}
                 ></div>
-                <span className="text-gray-600">
-                  {item.name}
-                </span>
+                <span className="text-gray-600">{item.name}</span>
               </div>
             ))}
           </div>

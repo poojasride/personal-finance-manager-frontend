@@ -167,6 +167,10 @@ function Categories() {
           </tbody>
 
         </table>
+
+        {categories.length === 0 && (
+            <div className="p-8 text-center text-gray-500">No categories found</div>
+          )}
       </div>
 
       {/* ==========================
