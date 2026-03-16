@@ -133,7 +133,7 @@ function Dashboard() {
             <div>
               <p className="text-gray-500 text-sm">Remaining Budget</p>
               <h2 className="text-xl font-semibold text-gray-800 mt-1">
-              ₹ {monthlyBudget - expenses.toLocaleString()}
+              ₹ {(monthlyBudget - expenses).toLocaleString()}
               </h2>
             </div>
 
