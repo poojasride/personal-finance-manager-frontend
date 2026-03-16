@@ -44,9 +44,12 @@ function SignUp() {
       // Start loading
       setSubmitting(true);
 
+      const API_URL = "http://localhost:5000/api";
+      // const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api";
+
       // API call
       const response = await axios.post(
-        `https://personal-finance-manager-backend-n06b.onrender.com/api/auth/register`, //  backend URL
+        `${API_URL}/auth/register`, //  backend URL
         values,
       );
 
@@ -71,7 +74,8 @@ function SignUp() {
     <div className="max-w-4xl mx-auto p-8  m-18">
       {/* <img src={logo} alt="Personal Finance Manager Logo" className="mx-auto w-24 h-24" /> */}
       <h1 className="text-3xl font-bold text-center font-serif">
-        Create Your <span className="text-green-800">Personal Finance Manager</span> Account
+        Create Your{" "}
+        <span className="text-green-800">Personal Finance Manager</span> Account
       </h1>
       <p className="text-center mt-4 text-gray-600 text-lg font-semibold tracking-loose">
         Sign up to start managing your personal finances securely.

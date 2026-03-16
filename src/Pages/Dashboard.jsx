@@ -14,7 +14,7 @@ function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const monthlyBudget = 10000;
+  const monthlyBudget = 0;
 
   useEffect(() => {
     loadTransactions();
@@ -23,7 +23,7 @@ function Dashboard() {
   const loadTransactions = async () => {
     try {
       const res = await getTransactions();
-      setTransactions(res.data);
+      setTransactions(res);
     } catch (error) {
       console.error("Error loading transactions", error);
     } finally {
@@ -133,7 +133,7 @@ function Dashboard() {
             <div>
               <p className="text-gray-500 text-sm">Remaining Budget</p>
               <h2 className="text-xl font-semibold text-gray-800 mt-1">
-              ₹ {(monthlyBudget - expenses).toLocaleString()}
+                ₹ {(monthlyBudget - expenses).toLocaleString()}
               </h2>
             </div>
 

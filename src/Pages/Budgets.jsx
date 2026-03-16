@@ -46,7 +46,7 @@ function Budgets() {
   const loadCategories = async () => {
     try {
       const res = await getCategories();
-      setCategories(res.data); // axios response data
+      setCategories(res); // axios response data
 
       console.log("categories:", res.data);
     } catch (error) {

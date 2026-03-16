@@ -32,7 +32,7 @@ function Recurring() {
     try {
       const res = await getTransactions();
 
-      const recurringData = res.data.filter((t) => t.isRecurring === true);
+      const recurringData = res.filter((t) => t.isRecurring === true);
 
       setRecurring(recurringData);
       setLoading(false);

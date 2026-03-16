@@ -29,9 +29,12 @@ function ForgotPassword() {
       // Start loading
       setSubmitting(true);
 
+      const API_URL = "http://localhost:5000/api";
+      // const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api";
+
       // API call
       const response = await axios.post(
-        `https://personal-finance-manager-backend-n06b.onrender.com/api/auth/forgot-password`, //  backend URL
+        `${API_URL}/auth/forgot-password`, //  backend URL
         values,
       );
 

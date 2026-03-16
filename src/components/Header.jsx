@@ -14,10 +14,13 @@ const Header = ({ onMenuClick }) => {
 
   const token = localStorage.getItem("token");
 
+  const API_URL = "http://localhost:5000/api";
+// const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api";
+
   // Axios instance (memoized)
   const api = useMemo(() => {
     return axios.create({
-      baseURL: "https://personal-finance-manager-backend-n06b.onrender.com/api",
+      baseURL: `${API_URL}`,
       headers: {
         Authorization: `Bearer ${token}`,
       },

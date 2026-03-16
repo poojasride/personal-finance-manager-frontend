@@ -32,7 +32,7 @@ function Expense() {
   const loadTransactions = async () => {
     try {
       const res = await getTransactions();
-      setTransactions(res.data);
+      setTransactions(res);
     } catch (err) {
       console.log(err);
     }
@@ -41,9 +41,9 @@ function Expense() {
   const loadCategories = async () => {
     try {
       const res = await getCategories();
-      setCategories(res.data); // axios response data
+      setCategories(res); // axios response data
 
-      console.log("categories:", res.data);
+      console.log("categories:", res);
     } catch (error) {
       console.log(error);
     }
@@ -314,7 +314,7 @@ function Expense() {
             >
               <option value="">All Categories</option>
 
-              {categories.map((cat) => (
+              {categories?.map((cat) => (
                 <option key={cat._id} value={cat.name}>
                   {cat.name}
                 </option>

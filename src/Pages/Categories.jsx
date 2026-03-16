@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Plus, Trash2, Edit } from "lucide-react";
-import axios from "axios";
+import {
+  getCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+} from "../api/categoryApi";
 
 function Categories() {
   const [categories, setCategories] = useState([]);
@@ -12,7 +17,9 @@ function Categories() {
     type: "Expense",
   });
 
-  const API = "https://personal-finance-manager-backend-n06b.onrender.com/api/categories";
+  // const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api/categories";
+
+  const API = "http://localhost:5000/api/categories";
 
   /* ================================
       LOAD CATEGORIES
@@ -20,8 +27,8 @@ function Categories() {
 
   const loadCategories = async () => {
     try {
-      const res = await axios.get(API);
-      setCategories(res.data);
+      const data = await getCategories();
+      setCategories(data);
     } catch (error) {
       console.log(error);
     }
@@ -51,9 +58,9 @@ function Categories() {
 
     try {
       if (editingId) {
-        await axios.put(`${API}/${editingId}`, formData);
+        await updateCategory(editingId, formData);
       } else {
-        await axios.post(API, formData);
+        await createCategory(formData);
       }
 
       setFormData({ name: "", type: "Expense" });
@@ -88,7 +95,7 @@ function Categories() {
     if (!window.confirm("Delete this category?")) return;
 
     try {
-      await axios.delete(`${API}/${id}`);
+      await deleteCategory(id);
       loadCategories();
     } catch (error) {
       console.log(error);
@@ -97,7 +104,6 @@ function Categories() {
 
   return (
     <div className="space-y-6">
-
       {/* Header */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Categories</h1>
@@ -117,7 +123,6 @@ function Categories() {
       {/* Table */}
       <div className="bg-white rounded-xl shadow overflow-x-auto">
         <table className="w-full">
-
           <thead className="border-b bg-gray-50">
             <tr>
               <th className="p-4 text-left">Name</th>
@@ -127,10 +132,8 @@ function Categories() {
           </thead>
 
           <tbody>
-
             {categories.map((cat) => (
               <tr key={cat._id} className="border-b hover:bg-gray-50">
-
                 <td className="p-4">{cat.name}</td>
 
                 <td className="text-center">
@@ -146,7 +149,6 @@ function Categories() {
                 </td>
 
                 <td className="flex justify-center gap-3 p-4">
-
                   <Edit
                     size={18}
                     className="cursor-pointer text-blue-500"
@@ -158,19 +160,17 @@ function Categories() {
                     className="cursor-pointer text-red-500"
                     onClick={() => handleDelete(cat._id)}
                   />
-
                 </td>
-
               </tr>
             ))}
-
           </tbody>
-
         </table>
 
         {categories.length === 0 && (
-            <div className="p-8 text-center text-gray-500">No categories found</div>
-          )}
+          <div className="p-8 text-center text-gray-500">
+            No categories found
+          </div>
+        )}
       </div>
 
       {/* ==========================
@@ -179,15 +179,12 @@ function Categories() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
-
           <div className="bg-white p-6 rounded-xl w-96 space-y-4">
-
             <h2 className="text-xl font-semibold">
               {editingId ? "Edit Category" : "Add Category"}
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-
               <input
                 type="text"
                 name="name"
@@ -209,7 +206,6 @@ function Categories() {
               </select>
 
               <div className="flex justify-end gap-3">
-
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
@@ -224,16 +220,11 @@ function Categories() {
                 >
                   {editingId ? "Update" : "Add"}
                 </button>
-
               </div>
-
             </form>
-
           </div>
-
         </div>
       )}
-
     </div>
   );
 }

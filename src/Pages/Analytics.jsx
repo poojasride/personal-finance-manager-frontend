@@ -29,7 +29,7 @@ function Analytics() {
     try {
       setLoading(true);
       const res = await getTransactions();
-      setTransactions(res.data || []);
+      setTransactions(res || []);
     } catch (error) {
       console.log(error);
     } finally {
