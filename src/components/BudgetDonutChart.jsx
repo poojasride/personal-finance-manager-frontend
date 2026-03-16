@@ -90,9 +90,7 @@ function BudgetDonutChart() {
 
       {/* Header */}
       <div className="mb-4">
-        <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">
-          Budget Analytics
-        </h3>
+       
         <p className="text-lg font-semibold text-gray-800">
           Overall Spending Overview
         </p>
