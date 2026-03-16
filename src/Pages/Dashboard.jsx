@@ -9,7 +9,6 @@ import {
 
 import MonthlyChart from "../components/MonthlyChart";
 import { getTransactions } from "../api/transactionApi";
-import AIInsightCard from "../components/AIInsightCard";
 
 function Dashboard() {
   const [transactions, setTransactions] = useState([]);
@@ -143,10 +142,6 @@ function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="mb-10">
-        <AIInsightCard />
       </div>
 
       {/* Chart + Budget */}
