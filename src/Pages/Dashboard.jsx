@@ -14,7 +14,7 @@ function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const monthlyBudget = 0;
+  const monthlyBudget = null;
 
   useEffect(() => {
     loadTransactions();
@@ -133,7 +133,7 @@ function Dashboard() {
             <div>
               <p className="text-gray-500 text-sm">Remaining Budget</p>
               <h2 className="text-xl font-semibold text-gray-800 mt-1">
-              ₹ {Math.abs(monthlyBudget - expenses).toLocaleString()}
+              ₹ {(monthlyBudget - expenses).toLocaleString()}
               </h2>
             </div>
 
