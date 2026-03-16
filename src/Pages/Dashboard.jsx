@@ -14,7 +14,7 @@ function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const monthlyBudget = null;
+  const monthlyBudget = 10000;
 
   useEffect(() => {
     loadTransactions();
