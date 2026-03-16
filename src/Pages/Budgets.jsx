@@ -323,11 +323,17 @@ function Budgets() {
             </tbody>
           </table>
 
-             {budgetsWithTracking.length === 0 && (
-              <div className="p-8 text-center text-gray-500">
-                No budgets found
-              </div>
-            )}
+          {budgetsWithTracking.length === 0 && (
+            <div className="p-8 text-center text-gray-500">
+              No budgets found
+            </div>
+          )}
+
+          {budgetsWithTracking.category === "General" && (
+            <span className="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+              Default
+            </span>
+          )}
         </div>
       </div>
     </div>
