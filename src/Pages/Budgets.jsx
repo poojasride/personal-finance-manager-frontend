@@ -329,11 +329,11 @@ function Budgets() {
             </div>
           )}
 
-          {budgetsWithTracking.category === "General" && (
+          {/* {budgetsWithTracking.category === "General" && (
             <span className="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
               Default
             </span>
-          )}
+          )} */}
         </div>
       </div>
     </div>
