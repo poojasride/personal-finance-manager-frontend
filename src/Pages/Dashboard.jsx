@@ -10,6 +10,7 @@ import {
 import MonthlyChart from "../components/MonthlyChart";
 import { getTransactions } from "../api/transactionApi";
 import { getBudget } from "../api/budgetApi"; // ✅ NEW
+import { data } from "react-router-dom";
 
 function Dashboard() {
   const [transactions, setTransactions] = useState([]);
@@ -29,7 +30,7 @@ function Dashboard() {
       ]);
 
       setTransactions(txnRes?.data || txnRes || []);
-      setMonthlyBudget(budgetRes?.limitAmount || 0); // ✅ important
+      setMonthlyBudget(budgetRes?.data.limitAmount || 0); // ✅ important
     } catch (error) {
       console.error("Error loading dashboard data", error);
     } finally {
