@@ -30,6 +30,8 @@ function Dashboard() {
       ]);
 
       setTransactions(txnRes?.data || txnRes || []);
+
+      console.log("", budgetRes?.data);
       setMonthlyBudget(budgetRes?.data.limitAmount || 0); // ✅ important
     } catch (error) {
       console.error("Error loading dashboard data", error);
@@ -52,9 +54,7 @@ function Dashboard() {
   // ✅ Budget logic
   const hasBudget = monthlyBudget > 0;
 
-  const remainingBudget = hasBudget
-    ? Math.max(monthlyBudget - expenses, 0)
-    : 0;
+  const remainingBudget = hasBudget ? Math.max(monthlyBudget - expenses, 0) : 0;
 
   const isOverBudget = hasBudget && expenses > monthlyBudget;
 
@@ -72,7 +72,6 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-
       {/* Header */}
       <div className="flex justify-between mb-10">
         <h1 className="text-3xl font-bold">Finance Dashboard</h1>
@@ -81,7 +80,6 @@ function Dashboard() {
 
       {/* Cards */}
       <div className="grid md:grid-cols-4 gap-6 mb-10">
-
         {/* Balance */}
         <div className="bg-green-500 text-white p-6 rounded-xl">
           <p>Total Balance</p>
@@ -120,7 +118,6 @@ function Dashboard() {
 
       {/* Chart + Budget */}
       <div className="grid lg:grid-cols-2 gap-8 mb-10">
-
         {/* Chart */}
         <div className="bg-white p-6 rounded-xl border">
           <h3>Monthly Overview</h3>
@@ -129,7 +126,6 @@ function Dashboard() {
 
         {/* Budget */}
         <div className="bg-white p-6 rounded-xl border">
-
           <h3 className="mb-4">Monthly Budget</h3>
 
           {!hasBudget ? (
@@ -146,8 +142,8 @@ function Dashboard() {
                     budgetPercent > 80
                       ? "bg-red-500"
                       : budgetPercent > 50
-                      ? "bg-yellow-400"
-                      : "bg-green-500"
+                        ? "bg-yellow-400"
+                        : "bg-green-500"
                   }`}
                   style={{ width: `${budgetPercent}%` }}
                 />
@@ -180,9 +176,7 @@ function Dashboard() {
                   <td>{new Date(t.date).toLocaleDateString()}</td>
                   <td
                     className={`text-right ${
-                      t.type === "income"
-                        ? "text-green-600"
-                        : "text-red-500"
+                      t.type === "income" ? "text-green-600" : "text-red-500"
                     }`}
                   >
                     ₹ {Number(t.amount).toLocaleString()}
