@@ -14,7 +14,8 @@ function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const monthlyBudget = 10000;
+  // ✅ Default 0
+  const monthlyBudget = 0;
 
   useEffect(() => {
     loadTransactions();
@@ -31,19 +32,25 @@ function Dashboard() {
     }
   };
 
+  // ✅ Safe calculations
   const income = transactions
     .filter((t) => t.type === "income")
-    .reduce((acc, curr) => acc + curr.amount, 0);
+    .reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
 
   const expenses = transactions
     .filter((t) => t.type === "expense")
-    .reduce((acc, curr) => acc + curr.amount, 0);
+    .reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
 
   const totalBalance = income - expenses;
 
-  const budgetPercent = Math.min((expenses / monthlyBudget) * 100, 100).toFixed(
-    0,
-  );
+  // ✅ Prevent divide by zero
+  const budgetPercent =
+    monthlyBudget > 0
+      ? Math.min((expenses / monthlyBudget) * 100, 100).toFixed(0)
+      : 0;
+
+  // ✅ Prevent negative remaining
+  const remainingBudget = Math.max(monthlyBudget - expenses, 0);
 
   const recentTransactions = [...transactions]
     .sort((a, b) => new Date(b.date) - new Date(a.date))
@@ -56,7 +63,6 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       {/* Header */}
-
       <div className="flex items-center justify-between mb-10">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">
@@ -73,11 +79,10 @@ function Dashboard() {
       </div>
 
       {/* Stats */}
-
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
-        {/* Balance */}
 
-        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl p-6 shadow-lg hover:scale-[1.02] transition">
+        {/* Balance */}
+        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl p-6 shadow-lg">
           <div className="flex justify-between items-center">
             <div>
               <p className="text-sm opacity-90">Total Balance</p>
@@ -133,7 +138,7 @@ function Dashboard() {
             <div>
               <p className="text-gray-500 text-sm">Remaining Budget</p>
               <h2 className="text-xl font-semibold text-gray-800 mt-1">
-                ₹ {(monthlyBudget - expenses).toLocaleString()}
+                ₹ {remainingBudget.toLocaleString()}
               </h2>
             </div>
 
@@ -145,23 +150,25 @@ function Dashboard() {
       </div>
 
       {/* Chart + Budget */}
-
       <div className="grid lg:grid-cols-2 gap-8 mb-10">
-        {/* Chart */}
 
+        {/* Chart */}
         <div className="bg-white p-6 rounded-2xl border shadow-sm">
-          <h3 className="font-semibold text-gray-700 mb-5">Monthly Overview</h3>
+          <h3 className="font-semibold text-gray-700 mb-5">
+            Monthly Overview
+          </h3>
 
           <MonthlyChart transactions={transactions} />
         </div>
 
-        {/* Budget Card */}
-
-        <div className="bg-white p-6 rounded-2xl border shadow-sm flex flex-col justify-between">
+        {/* Budget */}
+        <div className="bg-white p-6 rounded-2xl border shadow-sm">
           <div className="flex justify-between items-center mb-5">
             <div className="flex items-center gap-2">
               <Target className="text-emerald-500" size={20} />
-              <h3 className="font-semibold text-gray-700">Monthly Budget</h3>
+              <h3 className="font-semibold text-gray-700">
+                Monthly Budget
+              </h3>
             </div>
 
             <span className="text-xs bg-gray-100 px-3 py-1 rounded-full">
@@ -187,7 +194,7 @@ function Dashboard() {
             <div>
               <p className="text-xs text-gray-500">Remaining</p>
               <p className="text-emerald-600 font-semibold">
-                ₹ {(monthlyBudget - expenses).toLocaleString()}
+                ₹ {remainingBudget.toLocaleString()}
               </p>
             </div>
           </div>
@@ -198,8 +205,8 @@ function Dashboard() {
                 budgetPercent > 80
                   ? "bg-red-500"
                   : budgetPercent > 50
-                    ? "bg-yellow-400"
-                    : "bg-emerald-500"
+                  ? "bg-yellow-400"
+                  : "bg-emerald-500"
               }`}
               style={{ width: `${budgetPercent}%` }}
             />
@@ -208,7 +215,6 @@ function Dashboard() {
       </div>
 
       {/* Transactions */}
-
       <div className="bg-white rounded-2xl border shadow-sm p-6">
         <h3 className="font-semibold text-gray-700 mb-6">
           Recent Transactions
@@ -225,17 +231,17 @@ function Dashboard() {
 
           <tbody>
             {recentTransactions.map((t) => (
-              <tr key={t._id} className="border-b hover:bg-gray-50 transition">
+              <tr key={t._id} className="border-b hover:bg-gray-50">
                 <td className="py-3">{t.category}</td>
-
                 <td>{new Date(t.date).toLocaleDateString()}</td>
-
                 <td
                   className={`text-right font-semibold ${
-                    t.type === "income" ? "text-green-600" : "text-red-500"
+                    t.type === "income"
+                      ? "text-green-600"
+                      : "text-red-500"
                   }`}
                 >
-                  ₹ {t.amount}
+                  ₹ {Number(t.amount).toLocaleString()}
                 </td>
               </tr>
             ))}
