@@ -37,7 +37,7 @@ function Budgets() {
   const loadTransactions = async () => {
     try {
       const transactionsData = await getTransactions();
-      setTransactions(transactionsData.data);
+      setTransactions(transactionsData);
     } catch (err) {
       console.log(err);
     }

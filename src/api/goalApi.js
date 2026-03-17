@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = "http://localhost:5000/api/goals";
 // const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api/goals";
 
 export const getGoals = async () => {

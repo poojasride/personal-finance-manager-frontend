@@ -196,7 +196,7 @@ function Expense() {
                     <option value="">Select Category</option>
 
                     {categories
-                      ?.filter(
+                      .filter(
                         (cat) =>
                           cat.type?.toLowerCase() ===
                           values.type?.toLowerCase(),
@@ -367,8 +367,6 @@ function Expense() {
             </button>
           </div>
         </div>
-
-       
 
         {/* TABLE */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
