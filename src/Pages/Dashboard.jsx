@@ -9,30 +9,35 @@ import {
 
 import MonthlyChart from "../components/MonthlyChart";
 import { getTransactions } from "../api/transactionApi";
+import { getBudget } from "../api/budgetApi"; // ✅ NEW
 
 function Dashboard() {
   const [transactions, setTransactions] = useState([]);
+  const [monthlyBudget, setMonthlyBudget] = useState(0); // ✅ from API
   const [loading, setLoading] = useState(true);
 
-  // ✅ Default 0
-  const monthlyBudget = 0;
-
   useEffect(() => {
-    loadTransactions();
+    loadData();
   }, []);
 
-  const loadTransactions = async () => {
+  // ✅ Load both data
+  const loadData = async () => {
     try {
-      const res = await getTransactions();
-      setTransactions(res);
+      const [txnRes, budgetRes] = await Promise.all([
+        getTransactions(),
+        getBudget(),
+      ]);
+
+      setTransactions(txnRes?.data || txnRes || []);
+      setMonthlyBudget(budgetRes?.amount || 0); // ✅ important
     } catch (error) {
-      console.error("Error loading transactions", error);
+      console.error("Error loading dashboard data", error);
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Safe calculations
+  // ✅ Calculations
   const income = transactions
     .filter((t) => t.type === "income")
     .reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
@@ -43,14 +48,18 @@ function Dashboard() {
 
   const totalBalance = income - expenses;
 
-  // ✅ Prevent divide by zero
-  const budgetPercent =
-    monthlyBudget > 0
-      ? Math.min((expenses / monthlyBudget) * 100, 100).toFixed(0)
-      : 0;
+  // ✅ Budget logic
+  const hasBudget = monthlyBudget > 0;
 
-  // ✅ Prevent negative remaining
-  const remainingBudget = Math.max(monthlyBudget - expenses, 0);
+  const remainingBudget = hasBudget
+    ? Math.max(monthlyBudget - expenses, 0)
+    : 0;
+
+  const isOverBudget = hasBudget && expenses > monthlyBudget;
+
+  const budgetPercent = hasBudget
+    ? Math.min((expenses / monthlyBudget) * 100, 100).toFixed(0)
+    : 0;
 
   const recentTransactions = [...transactions]
     .sort((a, b) => new Date(b.date) - new Date(a.date))
@@ -62,90 +71,49 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-10">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">
-            Finance Dashboard
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Manage and track your financial activity
-          </p>
-        </div>
 
-        <div className="bg-white border px-5 py-2 rounded-xl shadow-sm text-sm text-gray-600">
-          {new Date().toDateString()}
-        </div>
+      {/* Header */}
+      <div className="flex justify-between mb-10">
+        <h1 className="text-3xl font-bold">Finance Dashboard</h1>
+        <div>{new Date().toDateString()}</div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
+      {/* Cards */}
+      <div className="grid md:grid-cols-4 gap-6 mb-10">
 
         {/* Balance */}
-        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl p-6 shadow-lg">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-sm opacity-90">Total Balance</p>
-              <h2 className="text-2xl font-bold mt-1">
-                ₹ {totalBalance.toLocaleString()}
-              </h2>
-            </div>
-
-            <div className="bg-white/20 p-3 rounded-lg">
-              <Wallet size={22} />
-            </div>
-          </div>
+        <div className="bg-green-500 text-white p-6 rounded-xl">
+          <p>Total Balance</p>
+          <h2>₹ {totalBalance.toLocaleString()}</h2>
         </div>
 
-        {/* Expenses */}
-
-        <div className="bg-white rounded-2xl p-6 border shadow-sm hover:shadow-md transition">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-gray-500 text-sm">Expenses</p>
-              <h2 className="text-xl font-semibold text-gray-800 mt-1">
-                ₹ {expenses.toLocaleString()}
-              </h2>
-            </div>
-
-            <div className="bg-red-100 p-3 rounded-lg">
-              <TrendingDown className="text-red-500" size={20} />
-            </div>
-          </div>
+        {/* Expense */}
+        <div className="bg-white p-6 rounded-xl border">
+          <p>Expenses</p>
+          <h2>₹ {expenses.toLocaleString()}</h2>
         </div>
 
         {/* Income */}
-
-        <div className="bg-white rounded-2xl p-6 border shadow-sm hover:shadow-md transition">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-gray-500 text-sm">Income</p>
-              <h2 className="text-xl font-semibold text-gray-800 mt-1">
-                ₹ {income.toLocaleString()}
-              </h2>
-            </div>
-
-            <div className="bg-green-100 p-3 rounded-lg">
-              <TrendingUp className="text-green-500" size={20} />
-            </div>
-          </div>
+        <div className="bg-white p-6 rounded-xl border">
+          <p>Income</p>
+          <h2>₹ {income.toLocaleString()}</h2>
         </div>
 
         {/* Remaining */}
+        <div className="bg-white p-6 rounded-xl border">
+          <p>Remaining Budget</p>
 
-        <div className="bg-white rounded-2xl p-6 border shadow-sm hover:shadow-md transition">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-gray-500 text-sm">Remaining Budget</p>
-              <h2 className="text-xl font-semibold text-gray-800 mt-1">
-                ₹ {remainingBudget.toLocaleString()}
-              </h2>
-            </div>
-
-            <div className="bg-blue-100 p-3 rounded-lg">
-              <PiggyBank className="text-blue-500" size={20} />
-            </div>
-          </div>
+          {!hasBudget ? (
+            <p className="text-gray-400">No budget set</p>
+          ) : (
+            <p
+              className={`font-semibold ${
+                isOverBudget ? "text-red-600" : "text-green-600"
+              }`}
+            >
+              ₹ {remainingBudget.toLocaleString()}
+            </p>
+          )}
         </div>
       </div>
 
@@ -153,105 +121,75 @@ function Dashboard() {
       <div className="grid lg:grid-cols-2 gap-8 mb-10">
 
         {/* Chart */}
-        <div className="bg-white p-6 rounded-2xl border shadow-sm">
-          <h3 className="font-semibold text-gray-700 mb-5">
-            Monthly Overview
-          </h3>
-
+        <div className="bg-white p-6 rounded-xl border">
+          <h3>Monthly Overview</h3>
           <MonthlyChart transactions={transactions} />
         </div>
 
         {/* Budget */}
-        <div className="bg-white p-6 rounded-2xl border shadow-sm">
-          <div className="flex justify-between items-center mb-5">
-            <div className="flex items-center gap-2">
-              <Target className="text-emerald-500" size={20} />
-              <h3 className="font-semibold text-gray-700">
-                Monthly Budget
-              </h3>
-            </div>
+        <div className="bg-white p-6 rounded-xl border">
 
-            <span className="text-xs bg-gray-100 px-3 py-1 rounded-full">
-              {budgetPercent}% used
-            </span>
-          </div>
+          <h3 className="mb-4">Monthly Budget</h3>
 
-          <div className="grid grid-cols-3 text-center mb-5">
-            <div>
-              <p className="text-xs text-gray-500">Spent</p>
-              <p className="text-red-500 font-semibold">
-                ₹ {expenses.toLocaleString()}
-              </p>
-            </div>
+          {!hasBudget ? (
+            <p className="text-gray-400">No budget set</p>
+          ) : (
+            <>
+              <p>Spent: ₹ {expenses.toLocaleString()}</p>
+              <p>Budget: ₹ {monthlyBudget.toLocaleString()}</p>
+              <p>Remaining: ₹ {remainingBudget.toLocaleString()}</p>
 
-            <div>
-              <p className="text-xs text-gray-500">Budget</p>
-              <p className="font-semibold">
-                ₹ {monthlyBudget.toLocaleString()}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs text-gray-500">Remaining</p>
-              <p className="text-emerald-600 font-semibold">
-                ₹ {remainingBudget.toLocaleString()}
-              </p>
-            </div>
-          </div>
-
-          <div className="w-full bg-gray-200 rounded-full h-3">
-            <div
-              className={`h-3 rounded-full ${
-                budgetPercent > 80
-                  ? "bg-red-500"
-                  : budgetPercent > 50
-                  ? "bg-yellow-400"
-                  : "bg-emerald-500"
-              }`}
-              style={{ width: `${budgetPercent}%` }}
-            />
-          </div>
+              <div className="w-full bg-gray-200 h-3 mt-4 rounded">
+                <div
+                  className={`h-3 rounded ${
+                    budgetPercent > 80
+                      ? "bg-red-500"
+                      : budgetPercent > 50
+                      ? "bg-yellow-400"
+                      : "bg-green-500"
+                  }`}
+                  style={{ width: `${budgetPercent}%` }}
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
 
       {/* Transactions */}
-      <div className="bg-white rounded-2xl border shadow-sm p-6">
-        <h3 className="font-semibold text-gray-700 mb-6">
-          Recent Transactions
-        </h3>
+      <div className="bg-white p-6 rounded-xl border">
+        <h3 className="mb-4">Recent Transactions</h3>
 
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-gray-500 border-b">
-              <th className="text-left py-3">Category</th>
-              <th className="text-left">Date</th>
-              <th className="text-right">Amount</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {recentTransactions.map((t) => (
-              <tr key={t._id} className="border-b hover:bg-gray-50">
-                <td className="py-3">{t.category}</td>
-                <td>{new Date(t.date).toLocaleDateString()}</td>
-                <td
-                  className={`text-right font-semibold ${
-                    t.type === "income"
-                      ? "text-green-600"
-                      : "text-red-500"
-                  }`}
-                >
-                  ₹ {Number(t.amount).toLocaleString()}
-                </td>
+        {recentTransactions.length === 0 ? (
+          <p>No transactions</p>
+        ) : (
+          <table className="w-full">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Date</th>
+                <th className="text-right">Amount</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
 
-        {recentTransactions.length === 0 && (
-          <div className="p-8 text-center text-gray-500">
-            No transactions found
-          </div>
+            <tbody>
+              {recentTransactions.map((t) => (
+                <tr key={t._id}>
+                  <td>{t.category}</td>
+                  <td>{new Date(t.date).toLocaleDateString()}</td>
+                  <td
+                    className={`text-right ${
+                      t.type === "income"
+                        ? "text-green-600"
+                        : "text-red-500"
+                    }`}
+                  >
+                    ₹ {Number(t.amount).toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
     </div>
