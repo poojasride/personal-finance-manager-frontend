@@ -29,7 +29,7 @@ function Dashboard() {
       ]);
 
       setTransactions(txnRes?.data || txnRes || []);
-      setMonthlyBudget(budgetRes?.amount || 0); // ✅ important
+      setMonthlyBudget(budgetRes?.limitAmount || 0); // ✅ important
     } catch (error) {
       console.error("Error loading dashboard data", error);
     } finally {
