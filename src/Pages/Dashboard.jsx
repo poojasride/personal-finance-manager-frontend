@@ -9,7 +9,7 @@ import {
 
 import MonthlyChart from "../components/MonthlyChart";
 import { getTransactions } from "../api/transactionApi";
-import { getBudget } from "../api/budgetApi";
+import { getBudgets } from "../api/budgetApi"; // ✅ FIXED
 
 function Dashboard() {
   const [transactions, setTransactions] = useState([]);
@@ -24,26 +24,26 @@ function Dashboard() {
     try {
       const [txnRes, budgetRes] = await Promise.all([
         getTransactions(),
-        getBudget(),
+        getBudgets(), // ✅ FIXED
       ]);
 
-      const txnData = txnRes?.data || txnRes || [];
-      const budgetData = budgetRes?.data || [];
+      const txnData = txnRes || [];
+      const budgetData = budgetRes || []; // ✅ NO .data
 
       setTransactions(txnData);
 
-      // ✅ CURRENT MONTH FILTER
+      // ✅ CURRENT DATE
       const now = new Date();
 
-      const currentMonthBudgets = budgetData.filter((b) => {
+      // ✅ FILTER CURRENT ACTIVE BUDGETS
+      const currentBudgets = budgetData.filter((b) => {
         const start = new Date(b.startDate);
         const end = new Date(b.endDate);
-
         return now >= start && now <= end;
       });
 
-      // ✅ SUM ALL BUDGETS
-      const totalBudget = currentMonthBudgets.reduce(
+      // ✅ TOTAL BUDGET
+      const totalBudget = currentBudgets.reduce(
         (acc, curr) => acc + Number(curr.limitAmount || 0),
         0
       );
@@ -80,7 +80,6 @@ function Dashboard() {
     ? Math.min((expenses / monthlyBudget) * 100, 100)
     : 0;
 
-  // ✅ RECENT TXNS
   const recentTransactions = [...transactions]
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5);
@@ -91,33 +90,27 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      {/* Header */}
       <div className="flex justify-between mb-10">
         <h1 className="text-3xl font-bold">Finance Dashboard</h1>
         <div>{new Date().toDateString()}</div>
       </div>
 
-      {/* Cards */}
       <div className="grid md:grid-cols-4 gap-6 mb-10">
-        {/* Balance */}
         <div className="bg-green-500 text-white p-6 rounded-xl">
           <p>Total Balance</p>
           <h2>₹ {totalBalance.toLocaleString()}</h2>
         </div>
 
-        {/* Expense */}
         <div className="bg-white p-6 rounded-xl border">
           <p>Expenses</p>
           <h2>₹ {expenses.toLocaleString()}</h2>
         </div>
 
-        {/* Income */}
         <div className="bg-white p-6 rounded-xl border">
           <p>Income</p>
           <h2>₹ {income.toLocaleString()}</h2>
         </div>
 
-        {/* Remaining */}
         <div className="bg-white p-6 rounded-xl border">
           <p>Remaining Budget</p>
 
@@ -135,15 +128,12 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Chart + Budget */}
       <div className="grid lg:grid-cols-2 gap-8 mb-10">
-        {/* Chart */}
         <div className="bg-white p-6 rounded-xl border">
           <h3>Monthly Overview</h3>
           <MonthlyChart transactions={transactions} />
         </div>
 
-        {/* Budget */}
         <div className="bg-white p-6 rounded-xl border">
           <h3 className="mb-4">Monthly Budget</h3>
 
@@ -178,7 +168,6 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Transactions */}
       <div className="bg-white p-6 rounded-xl border">
         <h3 className="mb-4">Recent Transactions</h3>
 
