@@ -17,9 +17,9 @@ function Categories() {
     type: "Expense",
   });
 
-  // const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api/categories";
+  const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api/categories";
 
-  const API = "http://localhost:5000/api/categories";
+  // const API = "http://localhost:5000/api/categories";
 
   /* ================================
       LOAD CATEGORIES

@@ -20,8 +20,8 @@ function MonthlyChart() {
 
   const fetchTransactions = async () => {
     try {
-      const API_URL = "http://localhost:5000/api";
-      // const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api";
+      // const API_URL = "http://localhost:5000/api";
+      const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api";
 
       const res = await axios.get(`${API_URL}/transactions`, {
         headers: {

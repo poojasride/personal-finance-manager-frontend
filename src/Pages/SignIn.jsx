@@ -33,8 +33,8 @@ function Signin() {
       //Start loading
       setSubmitting(true);
 
-      const API_URL = "http://localhost:5000/api";
-      // const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api";
+      // const API_URL = "http://localhost:5000/api";
+      const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api";
 
       //API call
       const response = await axios.post(

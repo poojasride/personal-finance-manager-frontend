@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/budgets";
-// const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api/budgets";
+// const API_URL = "http://localhost:5000/api/budgets";
+const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api/budgets";
 
 export const getBudgets = async () => {
   const res = await axios.get(API_URL);
