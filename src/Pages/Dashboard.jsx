@@ -31,7 +31,7 @@ function Dashboard() {
 
       setTransactions(txnRes?.data || txnRes || []);
 
-      console.log("", budgetRes?.data);
+      console.log("budget", budgetRes?.data);
       setMonthlyBudget(budgetRes?.data.limitAmount || 0); // ✅ important
     } catch (error) {
       console.error("Error loading dashboard data", error);
