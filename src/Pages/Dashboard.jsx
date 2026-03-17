@@ -9,19 +9,17 @@ import {
 
 import MonthlyChart from "../components/MonthlyChart";
 import { getTransactions } from "../api/transactionApi";
-import { getBudget } from "../api/budgetApi"; // ✅ NEW
-import { data } from "react-router-dom";
+import { getBudget } from "../api/budgetApi";
 
 function Dashboard() {
   const [transactions, setTransactions] = useState([]);
-  const [monthlyBudget, setMonthlyBudget] = useState(0); // ✅ from API
+  const [monthlyBudget, setMonthlyBudget] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadData();
   }, []);
 
-  // ✅ Load both data
   const loadData = async () => {
     try {
       const [txnRes, budgetRes] = await Promise.all([
@@ -29,10 +27,28 @@ function Dashboard() {
         getBudget(),
       ]);
 
-      setTransactions(txnRes?.data || txnRes || []);
+      const txnData = txnRes?.data || txnRes || [];
+      const budgetData = budgetRes?.data || [];
 
-      console.log("budget", budgetRes?.data);
-      setMonthlyBudget(budgetRes?.data.limitAmount || 0); // ✅ important
+      setTransactions(txnData);
+
+      // ✅ CURRENT MONTH FILTER
+      const now = new Date();
+
+      const currentMonthBudgets = budgetData.filter((b) => {
+        const start = new Date(b.startDate);
+        const end = new Date(b.endDate);
+
+        return now >= start && now <= end;
+      });
+
+      // ✅ SUM ALL BUDGETS
+      const totalBudget = currentMonthBudgets.reduce(
+        (acc, curr) => acc + Number(curr.limitAmount || 0),
+        0
+      );
+
+      setMonthlyBudget(totalBudget);
     } catch (error) {
       console.error("Error loading dashboard data", error);
     } finally {
@@ -40,7 +56,7 @@ function Dashboard() {
     }
   };
 
-  // ✅ Calculations
+  // ✅ CALCULATIONS
   const income = transactions
     .filter((t) => t.type === "income")
     .reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
@@ -51,17 +67,20 @@ function Dashboard() {
 
   const totalBalance = income - expenses;
 
-  // ✅ Budget logic
+  // ✅ BUDGET LOGIC
   const hasBudget = monthlyBudget > 0;
 
-  const remainingBudget = hasBudget ? Math.max(monthlyBudget - expenses, 0) : 0;
+  const remainingBudget = hasBudget
+    ? monthlyBudget - expenses
+    : 0;
 
   const isOverBudget = hasBudget && expenses > monthlyBudget;
 
   const budgetPercent = hasBudget
-    ? Math.min((expenses / monthlyBudget) * 100, 100).toFixed(0)
+    ? Math.min((expenses / monthlyBudget) * 100, 100)
     : 0;
 
+  // ✅ RECENT TXNS
   const recentTransactions = [...transactions]
     .sort((a, b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5);
@@ -142,12 +161,18 @@ function Dashboard() {
                     budgetPercent > 80
                       ? "bg-red-500"
                       : budgetPercent > 50
-                        ? "bg-yellow-400"
-                        : "bg-green-500"
+                      ? "bg-yellow-400"
+                      : "bg-green-500"
                   }`}
                   style={{ width: `${budgetPercent}%` }}
                 />
               </div>
+
+              {isOverBudget && (
+                <p className="text-red-500 mt-2 text-sm">
+                  ⚠️ Budget exceeded!
+                </p>
+              )}
             </>
           )}
         </div>
@@ -176,7 +201,9 @@ function Dashboard() {
                   <td>{new Date(t.date).toLocaleDateString()}</td>
                   <td
                     className={`text-right ${
-                      t.type === "income" ? "text-green-600" : "text-red-500"
+                      t.type === "income"
+                        ? "text-green-600"
+                        : "text-red-500"
                     }`}
                   >
                     ₹ {Number(t.amount).toLocaleString()}
