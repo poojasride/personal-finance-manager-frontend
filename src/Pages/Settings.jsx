@@ -149,23 +149,19 @@ function Settings() {
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
+    const saved = localStorage.getItem("preferences");
 
-const saved = localStorage.getItem("preferences")
+    if (saved) {
+      const parsed = JSON.parse(saved);
 
-if(saved){
+      setPreferences(parsed);
 
-const parsed = JSON.parse(saved)
-
-setPreferences(parsed)
-
-if(parsed.darkMode){
-document.documentElement.classList.add("dark")
-}
-
-}
-
-},[])
+      if (parsed.darkMode) {
+        document.documentElement.classList.add("dark");
+      }
+    }
+  }, []);
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -220,7 +216,7 @@ document.documentElement.classList.add("dark")
             Security
           </button>
 
-          <button
+          {/* <button
             onClick={() => setActiveTab("preferences")}
             className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg
             ${
@@ -231,7 +227,7 @@ document.documentElement.classList.add("dark")
           >
             <Bell size={16} />
             Preferences
-          </button>
+          </button> */}
         </div>
 
         {/* Content */}
@@ -323,7 +319,8 @@ document.documentElement.classList.add("dark")
                 <button
                   onClick={handlePasswordChange}
                   disabled={loadingPassword}
-                  className="bg-gray-900 text-white px-4 py-2 rounded-lg"
+                  className="  bg-gradient-to-r from-emerald-500 to-teal-500
+  text-white px-4 py-2 rounded-lg"
                 >
                   {loadingPassword ? "Updating..." : "Change Password"}
                 </button>
@@ -332,7 +329,7 @@ document.documentElement.classList.add("dark")
           )}
 
           {/* Preferences */}
-          {activeTab === "preferences" && (
+          {/* {activeTab === "preferences" && (
             <div className="bg-white border rounded-xl p-6">
               <h2 className="font-semibold text-lg mb-6">Preferences</h2>
 
@@ -371,7 +368,7 @@ document.documentElement.classList.add("dark")
                 </div>
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>

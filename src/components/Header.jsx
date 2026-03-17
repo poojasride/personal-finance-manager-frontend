@@ -15,7 +15,7 @@ const Header = ({ onMenuClick }) => {
   const token = localStorage.getItem("token");
 
   const API_URL = "http://localhost:5000/api";
-// const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api";
+  // const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api";
 
   // Axios instance (memoized)
   const api = useMemo(() => {
@@ -129,6 +129,13 @@ const Header = ({ onMenuClick }) => {
                   Notifications
                 </h4>
 
+                <button
+                  onClick={() => setNotificationOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 text-sm"
+                >
+                  ✖
+                </button>
+
                 {unreadCount > 0 && (
                   <button
                     onClick={async () => {
@@ -214,16 +221,27 @@ const Header = ({ onMenuClick }) => {
             className="flex items-center gap-2 p-1 hover:bg-gray-100 rounded-lg"
           >
             <img
-              src="https://i.pravatar.cc/40"
+              src={
+                user?.profilePicture
+                  ? user.profilePicture
+                  : `https://ui-avatars.com/api/?name=${user?.username || "User"}&background=10b981&color=fff`
+              }
               alt="user"
-              className="w-9 h-9 rounded-full"
+              className="w-9 h-9 rounded-full object-cover"
             />
-
             <ChevronDown size={16} />
           </button>
 
           {profileOpen && (
             <div className="absolute right-0 mt-3 w-52 bg-white border rounded-xl shadow-lg">
+              <div className="flex justify-end px-3 pt-2">
+                <button
+                  onClick={() => setProfileOpen(false)}
+                  className="text-red-400 hover:text-red-600 text-sm"
+                >
+                  ✖
+                </button>
+              </div>
               <div className="px-4 py-3 border-b">
                 <p className="font-semibold">{user?.username}</p>
 
