@@ -9,7 +9,7 @@ import {
 
 import MonthlyChart from "../components/MonthlyChart";
 import { getTransactions } from "../api/transactionApi";
-import { getBudgets } from "../api/budgetApi"; // ✅ FIXED
+import { getBudgets } from "../api/budgetApi"; 
 
 function Dashboard() {
   const [transactions, setTransactions] = useState([]);
@@ -24,11 +24,11 @@ function Dashboard() {
     try {
       const [txnRes, budgetRes] = await Promise.all([
         getTransactions(),
-        getBudgets(), // ✅ FIXED
+        getBudgets(), 
       ]);
 
       const txnData = txnRes || [];
-      const budgetData = budgetRes || []; // ✅ NO .data
+      const budgetData = budgetRes || []; 
 
       setTransactions(txnData);
 
