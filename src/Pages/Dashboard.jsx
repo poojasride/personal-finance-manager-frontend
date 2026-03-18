@@ -9,7 +9,7 @@ import {
 
 import MonthlyChart from "../components/MonthlyChart";
 import { getTransactions } from "../api/transactionApi";
-import { getBudgets } from "../api/budgetApi"; 
+import { getBudgets } from "../api/budgetApi";
 
 function Dashboard() {
   const [transactions, setTransactions] = useState([]);
@@ -24,25 +24,22 @@ function Dashboard() {
     try {
       const [txnRes, budgetRes] = await Promise.all([
         getTransactions(),
-        getBudgets(), 
+        getBudgets(),
       ]);
 
       const txnData = txnRes || [];
-      const budgetData = budgetRes || []; 
+      const budgetData = budgetRes || [];
 
       setTransactions(txnData);
 
-      // ✅ CURRENT DATE
       const now = new Date();
 
-      // ✅ FILTER CURRENT ACTIVE BUDGETS
       const currentBudgets = budgetData.filter((b) => {
         const start = new Date(b.startDate);
         const end = new Date(b.endDate);
         return now >= start && now <= end;
       });
 
-      // ✅ TOTAL BUDGET
       const totalBudget = currentBudgets.reduce(
         (acc, curr) => acc + Number(curr.limitAmount || 0),
         0
@@ -56,7 +53,6 @@ function Dashboard() {
     }
   };
 
-  // ✅ CALCULATIONS
   const income = transactions
     .filter((t) => t.type === "income")
     .reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
@@ -67,13 +63,8 @@ function Dashboard() {
 
   const totalBalance = income - expenses;
 
-  // ✅ BUDGET LOGIC
   const hasBudget = monthlyBudget > 0;
-
-  const remainingBudget = hasBudget
-    ? monthlyBudget - expenses
-    : 0;
-
+  const remainingBudget = hasBudget ? monthlyBudget - expenses : 0;
   const isOverBudget = hasBudget && expenses > monthlyBudget;
 
   const budgetPercent = hasBudget
@@ -90,52 +81,83 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="flex justify-between mb-10">
+      {/* HEADER */}
+      <div className="flex justify-between mb-10 items-center">
         <h1 className="text-3xl font-bold">Finance Dashboard</h1>
-        <div>{new Date().toDateString()}</div>
+        <div className="text-gray-500">{new Date().toDateString()}</div>
       </div>
 
+      {/* CARDS */}
       <div className="grid md:grid-cols-4 gap-6 mb-10">
-        <div className="bg-green-500 text-white p-6 rounded-xl">
-          <p>Total Balance</p>
-          <h2>₹ {totalBalance.toLocaleString()}</h2>
+        
+        {/* TOTAL BALANCE */}
+        <div className="bg-green-500 text-white p-6 rounded-2xl shadow flex justify-between items-center">
+          <div>
+            <p>Total Balance</p>
+            <h2 className="text-xl font-bold">
+              ₹ {totalBalance.toLocaleString()}
+            </h2>
+          </div>
+          <Wallet size={40} />
         </div>
 
-        <div className="bg-white p-6 rounded-xl border">
-          <p>Expenses</p>
-          <h2>₹ {expenses.toLocaleString()}</h2>
+        {/* EXPENSE */}
+        <div className="bg-white p-6 rounded-2xl shadow flex justify-between items-center">
+          <div>
+            <p>Expenses</p>
+            <h2 className="text-lg font-semibold">
+              ₹ {expenses.toLocaleString()}
+            </h2>
+          </div>
+          <TrendingDown className="text-red-500" size={36} />
         </div>
 
-        <div className="bg-white p-6 rounded-xl border">
-          <p>Income</p>
-          <h2>₹ {income.toLocaleString()}</h2>
+        {/* INCOME */}
+        <div className="bg-white p-6 rounded-2xl shadow flex justify-between items-center">
+          <div>
+            <p>Income</p>
+            <h2 className="text-lg font-semibold">
+              ₹ {income.toLocaleString()}
+            </h2>
+          </div>
+          <TrendingUp className="text-green-500" size={36} />
         </div>
 
-        <div className="bg-white p-6 rounded-xl border">
-          <p>Remaining Budget</p>
+        {/* BUDGET */}
+        <div className="bg-white p-6 rounded-2xl shadow flex justify-between items-center">
+          <div>
+            <p>Remaining Budget</p>
 
-          {!hasBudget ? (
-            <p className="text-gray-400">No budget set</p>
-          ) : (
-            <p
-              className={`font-semibold ${
-                isOverBudget ? "text-red-600" : "text-green-600"
-              }`}
-            >
-              ₹ {remainingBudget.toLocaleString()}
-            </p>
-          )}
+            {!hasBudget ? (
+              <p className="text-gray-400">No budget set</p>
+            ) : (
+              <p
+                className={`font-semibold ${
+                  isOverBudget ? "text-red-600" : "text-green-600"
+                }`}
+              >
+                ₹ {remainingBudget.toLocaleString()}
+              </p>
+            )}
+          </div>
+          <PiggyBank size={36} className="text-purple-500" />
         </div>
       </div>
 
+      {/* CHART + BUDGET */}
       <div className="grid lg:grid-cols-2 gap-8 mb-10">
-        <div className="bg-white p-6 rounded-xl border">
-          <h3>Monthly Overview</h3>
+        
+        <div className="bg-white p-6 rounded-2xl shadow">
+          <h3 className="mb-4 flex items-center gap-2 font-semibold">
+            <TrendingUp size={18} /> Monthly Overview
+          </h3>
           <MonthlyChart transactions={transactions} />
         </div>
 
-        <div className="bg-white p-6 rounded-xl border">
-          <h3 className="mb-4">Monthly Budget</h3>
+        <div className="bg-white p-6 rounded-2xl shadow">
+          <h3 className="mb-4 flex items-center gap-2 font-semibold">
+            <Target size={18} /> Monthly Budget
+          </h3>
 
           {!hasBudget ? (
             <p className="text-gray-400">No budget set</p>
@@ -145,9 +167,10 @@ function Dashboard() {
               <p>Budget: ₹ {monthlyBudget.toLocaleString()}</p>
               <p>Remaining: ₹ {remainingBudget.toLocaleString()}</p>
 
-              <div className="w-full bg-gray-200 h-3 mt-4 rounded">
+              {/* PROGRESS BAR */}
+              <div className="w-full bg-gray-200 h-3 mt-4 rounded-full overflow-hidden">
                 <div
-                  className={`h-3 rounded ${
+                  className={`h-3 rounded-full transition-all duration-500 ${
                     budgetPercent > 80
                       ? "bg-red-500"
                       : budgetPercent > 50
@@ -168,28 +191,32 @@ function Dashboard() {
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-xl border">
-        <h3 className="mb-4">Recent Transactions</h3>
+      {/* TRANSACTIONS */}
+      <div className="bg-white p-6 rounded-2xl shadow">
+        <h3 className="mb-4 font-semibold">Recent Transactions</h3>
 
         {recentTransactions.length === 0 ? (
           <p>No transactions</p>
         ) : (
           <table className="w-full">
-            <thead>
+            <thead className="text-gray-500 text-sm">
               <tr>
-                <th>Category</th>
-                <th>Date</th>
-                <th className="text-right">Amount</th>
+                <th className="text-left pb-2">Category</th>
+                <th className="text-left pb-2">Date</th>
+                <th className="text-right pb-2">Amount</th>
               </tr>
             </thead>
 
             <tbody>
               {recentTransactions.map((t) => (
-                <tr key={t._id}>
-                  <td>{t.category}</td>
+                <tr
+                  key={t._id}
+                  className="border-t hover:bg-gray-50 transition"
+                >
+                  <td className="py-2">{t.category}</td>
                   <td>{new Date(t.date).toLocaleDateString()}</td>
                   <td
-                    className={`text-right ${
+                    className={`text-right font-medium ${
                       t.type === "income"
                         ? "text-green-600"
                         : "text-red-500"
