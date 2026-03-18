@@ -42,7 +42,7 @@ function Dashboard() {
 
       const totalBudget = currentBudgets.reduce(
         (acc, curr) => acc + Number(curr.limitAmount || 0),
-        0
+        0,
       );
 
       setMonthlyBudget(totalBudget);
@@ -89,7 +89,6 @@ function Dashboard() {
 
       {/* CARDS */}
       <div className="grid md:grid-cols-4 gap-6 mb-10">
-        
         {/* TOTAL BALANCE */}
         <div className="bg-green-500 text-white p-6 rounded-2xl shadow flex justify-between items-center">
           <div>
@@ -146,7 +145,6 @@ function Dashboard() {
 
       {/* CHART + BUDGET */}
       <div className="grid lg:grid-cols-2 gap-8 mb-10">
-        
         <div className="bg-white p-6 rounded-2xl shadow">
           <h3 className="mb-4 flex items-center gap-2 font-semibold">
             <TrendingUp size={18} /> Monthly Overview
@@ -154,38 +152,101 @@ function Dashboard() {
           <MonthlyChart transactions={transactions} />
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow">
-          <h3 className="mb-4 flex items-center gap-2 font-semibold">
-            <Target size={18} /> Monthly Budget
-          </h3>
+        <div className="bg-white p-6 rounded-2xl shadow-lg">
+          {/* HEADER */}
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-2">
+              <Target size={20} className="text-blue-600" />
+              <h3 className="font-semibold text-lg">Monthly Budget</h3>
+            </div>
 
+            {hasBudget && (
+              <span
+                className={`text-xs px-3 py-1 rounded-full font-medium ${
+                  isOverBudget
+                    ? "bg-red-100 text-red-600"
+                    : budgetPercent > 70
+                      ? "bg-yellow-100 text-yellow-600"
+                      : "bg-green-100 text-green-600"
+                }`}
+              >
+                {isOverBudget
+                  ? "Over Budget"
+                  : budgetPercent > 70
+                    ? "Warning"
+                    : "On Track"}
+              </span>
+            )}
+          </div>
+
+          {/* NO BUDGET */}
           {!hasBudget ? (
-            <p className="text-gray-400">No budget set</p>
+            <div className="text-center py-10 text-gray-400">
+              <PiggyBank size={40} className="mx-auto mb-2" />
+              <p>No budget set</p>
+            </div>
           ) : (
             <>
-              <p>Spent: ₹ {expenses.toLocaleString()}</p>
-              <p>Budget: ₹ {monthlyBudget.toLocaleString()}</p>
-              <p>Remaining: ₹ {remainingBudget.toLocaleString()}</p>
+              {/* TOP NUMBERS */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div>
+                  <p className="text-sm text-gray-500">Spent</p>
+                  <h2 className="font-bold text-lg">
+                    ₹ {expenses.toLocaleString()}
+                  </h2>
+                </div>
 
-              {/* PROGRESS BAR */}
-              <div className="w-full bg-gray-200 h-3 mt-4 rounded-full overflow-hidden">
-                <div
-                  className={`h-3 rounded-full transition-all duration-500 ${
-                    budgetPercent > 80
-                      ? "bg-red-500"
-                      : budgetPercent > 50
-                      ? "bg-yellow-400"
-                      : "bg-green-500"
-                  }`}
-                  style={{ width: `${budgetPercent}%` }}
-                />
+                <div>
+                  <p className="text-sm text-gray-500">Budget</p>
+                  <h2 className="font-bold text-lg">
+                    ₹ {monthlyBudget.toLocaleString()}
+                  </h2>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500">Remaining</p>
+                  <h2
+                    className={`font-bold text-lg ${
+                      isOverBudget ? "text-red-600" : "text-green-600"
+                    }`}
+                  >
+                    ₹ {remainingBudget.toLocaleString()}
+                  </h2>
+                </div>
               </div>
 
-              {isOverBudget && (
-                <p className="text-red-500 mt-2 text-sm">
-                  ⚠️ Budget exceeded!
+              {/* PROGRESS BAR */}
+              <div className="mb-3">
+                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                  <span>Usage</span>
+                  <span>{Math.round(budgetPercent)}%</span>
+                </div>
+
+                <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className={`h-3 rounded-full transition-all duration-700 ${
+                      budgetPercent > 80
+                        ? "bg-gradient-to-r from-red-400 to-red-600"
+                        : budgetPercent > 50
+                          ? "bg-gradient-to-r from-yellow-300 to-yellow-500"
+                          : "bg-gradient-to-r from-green-400 to-green-600"
+                    }`}
+                    style={{ width: `${budgetPercent}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* FOOTER INFO */}
+              <div className="flex justify-between text-sm mt-3">
+                <p className="text-gray-500">
+                  Daily avg: ₹{" "}
+                  {Math.round(expenses / new Date().getDate()).toLocaleString()}
                 </p>
-              )}
+
+                {isOverBudget && (
+                  <p className="text-red-500 font-medium">⚠ Budget exceeded</p>
+                )}
+              </div>
             </>
           )}
         </div>
@@ -217,9 +278,7 @@ function Dashboard() {
                   <td>{new Date(t.date).toLocaleDateString()}</td>
                   <td
                     className={`text-right font-medium ${
-                      t.type === "income"
-                        ? "text-green-600"
-                        : "text-red-500"
+                      t.type === "income" ? "text-green-600" : "text-red-500"
                     }`}
                   >
                     ₹ {Number(t.amount).toLocaleString()}
