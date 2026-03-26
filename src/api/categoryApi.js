@@ -1,7 +1,8 @@
 import axios from "axios";
 
 // const API_URL = "http://localhost:5000/api";
-const API_URL = "https://personal-finance-manager-backend-n06b.onrender.com/api";
+const API_URL =
+  "https://personal-finance-manager-backend-n06b.onrender.com/api";
 
 const api = axios.create({
   baseURL: API_URL,
@@ -34,7 +35,14 @@ export const getCategories = async () => {
 ============================== */
 
 export const createCategory = async (data) => {
-  const res = await api.post("/categories", data);
+  const token = localStorage.getItem("token");
+
+  const res = await api.post("/categories", data, {
+    headers: token
+      ? { Authorization: `Bearer ${token}` }
+      : {},
+  });
+
   return res.data;
 };
 
