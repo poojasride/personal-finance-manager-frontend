@@ -39,7 +39,7 @@ export const createCategory = async (data) => {
 
   const res = await api.post("/categories", data, {
     headers: token
-      ? { Authorization: `Bearer ${token}` }
+      ? { authorization: `Bearer ${token}` }
       : {},
   });
 
