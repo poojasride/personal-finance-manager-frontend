@@ -54,7 +54,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       >
         {/* Top Section */}
         <div className="p-6 overflow-y-auto">
-
           {/* Mobile Header */}
           <div className="flex justify-between items-center mb-6 lg:hidden">
             <h2 className="text-lg font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
@@ -85,7 +84,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
           {/* Navigation Menu */}
           <nav className="space-y-2 text-sm">
-
             <Link
               to="/dashboard"
               onClick={() => setIsOpen(false)}
@@ -120,6 +118,15 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             >
               <Target size={18} />
               Goals
+            </Link>
+
+            <Link
+              to="/forecast"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/forecast")}`}
+            >
+              <Target size={18} />
+              Forecast
             </Link>
 
             <Link
@@ -175,7 +182,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               <Settings size={18} />
               Settings
             </Link>
-
           </nav>
         </div>
 
