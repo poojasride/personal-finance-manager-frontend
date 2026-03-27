@@ -7,6 +7,7 @@ import {
   PiggyBank,
   Target,
   BarChart3,
+  TrendingUp,
   Repeat,
   Tags,
   PlusCircle,
@@ -125,7 +126,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               onClick={() => setIsOpen(false)}
               className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/forecast")}`}
             >
-              <Target size={18} />
+            <TrendingUp size={18} />
               Forecast
             </Link>
 
