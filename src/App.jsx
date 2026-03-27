@@ -10,7 +10,7 @@ import Dashboard from "./Pages/Dashboard";
 import Budgets from "./Pages/Budgets";
 import Transactions from "./Pages/Transactions";
 import Goals from "./Pages/Goals";
-import Report from "./pages/Report";
+import Report from "./Pages/Report";
 import Forecast from "./Pages/Forecast"; 
 import Analytics from "./Pages/Analytics";
 import Recurring from "./Pages/Recurring";

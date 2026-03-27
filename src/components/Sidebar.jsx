@@ -160,7 +160,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             <Link
               to="/reports"
               onClick={() => setIsOpen(false)}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg ${activeClass("/reports")}`}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/reports")}`}
             >
               <BarChart size={18} />
               Reports
@@ -174,6 +174,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               <Download size={18} />
               Export CSV
             </Link>
+
             <Link
               to="/export-pdf"
               onClick={() => setIsOpen(false)}
@@ -182,6 +183,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               <Download size={18} />
               Export PDF
             </Link>
+            
             <Link
               to="/settings"
               onClick={() => setIsOpen(false)}
