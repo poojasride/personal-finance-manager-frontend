@@ -7,6 +7,7 @@ function Forecast() {
   const [forecast, setForecast] = useState(null);
   const [goalId, setGoalId] = useState("");
   const [goalForecast, setGoalForecast] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const token = localStorage.getItem("token");
 
@@ -15,21 +16,26 @@ function Forecast() {
   };
 
   // =========================
-  // GET FINANCIAL FORECAST
+  // 📊 GET FINANCIAL FORECAST
   // =========================
   const loadForecast = async () => {
     try {
+      setLoading(true);
       const res = await axios.get(API, { headers });
       setForecast(res.data);
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   // =========================
-  // GET GOAL FORECAST
+  // 🎯 GET GOAL FORECAST
   // =========================
   const handleGoalForecast = async () => {
+    if (!goalId) return alert("Please enter Goal ID");
+
     try {
       const res = await axios.get(`${API}/goal/${goalId}`, {
         headers,
@@ -37,6 +43,7 @@ function Forecast() {
       setGoalForecast(res.data);
     } catch (err) {
       console.log(err);
+      alert("Goal not found or error occurred");
     }
   };
 
@@ -48,12 +55,14 @@ function Forecast() {
     <div className="p-6 space-y-6">
 
       {/* =======================
-          FINANCIAL OVERVIEW
+          📊 FINANCIAL OVERVIEW
       ======================== */}
       <div className="bg-white p-6 rounded-xl shadow">
         <h2 className="text-xl font-bold mb-4">📊 Financial Forecast</h2>
 
-        {forecast ? (
+        {loading ? (
+          <p>Loading...</p>
+        ) : forecast ? (
           <div className="grid grid-cols-2 gap-4">
 
             <div className="bg-green-100 p-4 rounded-lg">
@@ -86,37 +95,30 @@ function Forecast() {
 
           </div>
         ) : (
-          <p>Loading...</p>
+          <p>No data available</p>
         )}
       </div>
 
-
       {/* =======================
-          SUGGESTIONS
+          💡 BACKEND SUGGESTION
       ======================== */}
       {forecast && (
         <div className="bg-yellow-50 p-4 rounded-xl">
           <h3 className="font-semibold mb-2">💡 Suggestions</h3>
-
-          {forecast.monthlySavings < 0 ? (
-            <p className="text-red-600">
-              ⚠️ You are overspending. Try reducing expenses.
-            </p>
-          ) : forecast.monthlySavings < 5000 ? (
-            <p className="text-orange-600">
-              ⚠️ Savings are low. Increase income or cut expenses.
-            </p>
-          ) : (
-            <p className="text-green-600">
-              ✅ Good job! Your savings are healthy.
-            </p>
-          )}
+          <p
+            className={`${
+              forecast.monthlySavings < 0
+                ? "text-red-600"
+                : "text-green-600"
+            }`}
+          >
+            {forecast.suggestion}
+          </p>
         </div>
       )}
 
-
       {/* =======================
-          GOAL FORECAST
+          🎯 GOAL FORECAST
       ======================== */}
       <div className="bg-white p-6 rounded-xl shadow space-y-4">
         <h2 className="text-xl font-bold">🎯 Goal Forecast</h2>
@@ -131,13 +133,20 @@ function Forecast() {
 
         <button
           onClick={handleGoalForecast}
-          className="bg-emerald-500 text-white px-4 py-2 rounded-lg"
+          className="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-emerald-600"
         >
           Calculate
         </button>
 
         {goalForecast && (
           <div className="mt-4 space-y-2">
+
+            <p>
+              💰 Monthly Savings:{" "}
+              <span className="font-bold">
+                ₹{goalForecast.monthlySavings?.toFixed(2)}
+              </span>
+            </p>
 
             <p>
               📅 Months Needed:{" "}
@@ -149,12 +158,27 @@ function Forecast() {
             <p>
               🏁 Completion Date:{" "}
               <span className="font-bold">
-                {new Date(
-                  goalForecast.estimatedCompletionDate
-                ).toLocaleDateString()}
+                {goalForecast.estimatedCompletionDate
+                  ? new Date(
+                      goalForecast.estimatedCompletionDate
+                    ).toLocaleDateString()
+                  : "N/A"}
               </span>
             </p>
 
+            {/* ⚠️ MESSAGE */}
+            {goalForecast.message && (
+              <p className="text-red-500">
+                {goalForecast.message}
+              </p>
+            )}
+
+            {/* 💡 SUGGESTION */}
+            {goalForecast.suggestion && (
+              <p className="text-blue-600">
+                💡 {goalForecast.suggestion}
+              </p>
+            )}
           </div>
         )}
       </div>
