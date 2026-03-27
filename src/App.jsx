@@ -10,6 +10,7 @@ import Dashboard from "./Pages/Dashboard";
 import Budgets from "./Pages/Budgets";
 import Transactions from "./Pages/Transactions";
 import Goals from "./Pages/Goals";
+import Report from "./pages/Report";
 import Forecast from "./Pages/Forecast"; 
 import Analytics from "./Pages/Analytics";
 import Recurring from "./Pages/Recurring";
@@ -49,6 +50,8 @@ function App() {
           <Route path="/goals" element={<Goals />} />
 
           <Route path="/forecast" element={<Forecast />} />
+
+          <Route path="/reports" element={<Report />} />
 
           <Route path="/analytics" element={<Analytics />} />
 
