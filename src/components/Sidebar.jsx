@@ -7,6 +7,7 @@ import {
   PiggyBank,
   Target,
   BarChart3,
+  BarChart,
   TrendingUp,
   Repeat,
   Tags,
@@ -95,6 +96,15 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             </Link>
 
             <Link
+              to="/categories"
+              onClick={() => setIsOpen(false)}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/categories")}`}
+            >
+              <Tags size={18} />
+              Categories
+            </Link>
+
+            <Link
               to="/transactions"
               onClick={() => setIsOpen(false)}
               className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/transactions")}`}
@@ -102,7 +112,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               <Wallet size={18} />
               Transactions
             </Link>
-
             <Link
               to="/budgets"
               onClick={() => setIsOpen(false)}
@@ -126,7 +135,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               onClick={() => setIsOpen(false)}
               className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/forecast")}`}
             >
-            <TrendingUp size={18} />
+              <TrendingUp size={18} />
               Forecast
             </Link>
 
@@ -149,12 +158,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             </Link>
 
             <Link
-              to="/categories"
+              to="/reports"
               onClick={() => setIsOpen(false)}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${activeClass("/categories")}`}
+              className={`flex items-center gap-3 px-4 py-2 rounded-lg ${activeClass("/reports")}`}
             >
-              <Tags size={18} />
-              Categories
+              <BarChart size={18} />
+              Reports
             </Link>
 
             <Link
@@ -165,7 +174,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               <Download size={18} />
               Export CSV
             </Link>
-
             <Link
               to="/export-pdf"
               onClick={() => setIsOpen(false)}
@@ -174,7 +182,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               <Download size={18} />
               Export PDF
             </Link>
-
             <Link
               to="/settings"
               onClick={() => setIsOpen(false)}
