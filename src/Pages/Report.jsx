@@ -64,7 +64,7 @@ export default function Report() {
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-6 space-y-6">
       {/* HEADER */}
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-800">📊 Financial Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-800">📊 Financial Reports</h1>
         <button
           onClick={loadData}
           className="bg-blue-600 text-white px-4 py-2 rounded-xl shadow hover:bg-blue-700 transition"
